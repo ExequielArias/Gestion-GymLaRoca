@@ -1,0 +1,61 @@
+<div class="min-h-screen bg-gradient-to-b from-gray-900 via-gray-900/95 to-gray-950 text-white">
+    <div class="container mx-auto px-6 py-10 space-y-10">
+        <h1 class="text-4xl font-extrabold text-center mb-10 text-red-400 tracking-wide">
+            Panel de Estadísticas Generales
+        </h1>
+
+        <div *ngIf="isLoading" class="flex flex-col items-center justify-center py-20">
+            <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-red-400"></div>
+            <span class="mt-4 text-lg text-gray-300">Cargando estadísticas...</span>
+        </div>
+
+        <ng-container *ngIf="!isLoading">
+            <!-- Tarjetas resumen -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div
+                    class="bg-gray-900 border border-gray-800 rounded-xl p-6 text-center shadow-lg hover:shadow-red-500/20 transition">
+                    <p class="text-gray-400 text-sm">Clientes activos</p>
+                    <h2 class="text-3xl font-bold text-red-400">{{ totalClientesActivos }}</h2>
+                </div>
+                <div
+                    class="bg-gray-900 border border-gray-800 rounded-xl p-6 text-center shadow-lg hover:shadow-red-500/20 transition">
+                    <p class="text-gray-400 text-sm">Clientes nuevos</p>
+                    <h2 class="text-3xl font-bold text-red-400">{{ totalClientesNuevos }}</h2>
+                </div>
+                <div
+                    class="bg-gray-900 border border-gray-800 rounded-xl p-6 text-center shadow-lg hover:shadow-red-500/20 transition">
+                    <p class="text-gray-400 text-sm">Asistencias hoy</p>
+                    <h2 class="text-3xl font-bold text-red-400">{{ totalAsistenciasHoy }}</h2>
+                </div>
+                <div
+                    class="bg-gray-900 border border-gray-800 rounded-xl p-6 text-center shadow-lg hover:shadow-red-500/20 transition">
+                    <p class="text-gray-400 text-sm">Tipos de membresía</p>
+                    <h2 class="text-3xl font-bold text-red-400">{{ totalTiposMembresia }}</h2>
+                </div>
+            </div>
+
+            <!-- Gráficos -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 mt-12">
+                <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 shadow-lg hover:shadow-red-700/20 transition">
+                    <h2 class="text-lg font-semibold mb-4 text-red-400">Clientes Activos por Mes</h2>
+                    <canvas id="activeClientsChart" class="w-full h-64"></canvas>
+                </div>
+
+                <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 shadow-lg hover:shadow-red-700/20 transition">
+                    <h2 class="text-lg font-semibold mb-4 text-red-400">Clientes Nuevos por Mes</h2>
+                    <canvas id="newClientsChart" class="w-full h-64"></canvas>
+                </div>
+
+                <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 shadow-lg hover:shadow-red-700/20 transition">
+                    <h2 class="text-lg font-semibold mb-4 text-red-400">Asistencias (Últimos 15 días)</h2>
+                    <canvas id="attendanceChart" class="w-full h-64"></canvas>
+                </div>
+
+                <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 shadow-lg hover:shadow-red-700/20 transition">
+                    <h2 class="text-lg font-semibold mb-4 text-red-400">Distribución de Membresías</h2>
+                    <canvas id="membershipPie" class="w-full h-64"></canvas>
+                </div>
+            </div>
+        </ng-container>
+    </div>
+</div>

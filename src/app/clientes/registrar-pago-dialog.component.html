@@ -1,0 +1,32 @@
+<div class="p-6 w-full max-w-md mx-auto">
+  <h2 class="text-xl font-bold mb-4">Registrar Pago de Inscripción</h2>
+  <div class="mb-4 flex gap-4">
+    <button (click)="pagoRealizado = true"
+      [class]="pagoRealizado === true ? 'border-2 border-green-500 bg-green-50' : 'border border-gray-300'"
+      class="p-3 rounded-lg flex-1">Pagó</button>
+    <button (click)="pagoRealizado = false"
+      [class]="pagoRealizado === false ? 'border-2 border-rose-500 bg-rose-50' : 'border border-gray-300'"
+      class="p-3 rounded-lg flex-1">No pagó</button>
+  </div>
+  <div *ngIf="pagoRealizado === true">
+    <label class="block mb-2 font-medium">Monto pagado ($)</label>
+    <input type="number" [(ngModel)]="monto" min="1" step="0.01" class="w-full px-3 py-2 border rounded mb-4"
+      placeholder="Ingrese el monto" />
+    <label class="block mb-2 font-medium">Cantidad de meses a pagar</label>
+    <input type="number" [(ngModel)]="meses" min="1" step="1" class="w-full px-3 py-2 border rounded mb-4"
+      placeholder="Meses (ej: 1)" />
+    <label class="block mb-2 font-medium">Método de pago</label>
+    <div class="flex gap-4 mb-4">
+      <button (click)="metodo = 'efectivo'"
+        [class]="metodo === 'efectivo' ? 'border-2 border-green-500 bg-green-50' : 'border border-gray-300'"
+        class="p-2 rounded-lg flex-1">Efectivo</button>
+      <button (click)="metodo = 'transferencia'"
+        [class]="metodo === 'transferencia' ? 'border-2 border-blue-500 bg-blue-50' : 'border border-gray-300'"
+        class="p-2 rounded-lg flex-1">Transferencia</button>
+    </div>
+  </div>
+  <div class="flex justify-end gap-2 mt-6">
+    <button (click)="cancelar()" class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">Cancelar</button>
+    <button (click)="confirmar()" class="px-4 py-2 bg-rose-600 text-white rounded hover:bg-rose-700">Confirmar</button>
+  </div>
+</div>

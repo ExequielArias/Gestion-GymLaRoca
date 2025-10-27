@@ -1,0 +1,108 @@
+<div
+    class="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-900 via-gray-900/95 to-gray-950 relative overflow-hidden">
+    <!-- Ambient subtle red glow -->
+    <div class="absolute inset-0 pointer-events-none">
+        <div
+            class="absolute -left-40 -top-40 w-96 h-96 rounded-full blur-3xl opacity-20 bg-gradient-to-tr from-red-700 via-transparent to-pink-600 animate-blob">
+        </div>
+        <div
+            class="absolute -right-40 -bottom-40 w-96 h-96 rounded-full blur-3xl opacity-12 bg-gradient-to-bl from-red-900 via-transparent to-orange-600 animate-blob animation-delay-2000">
+        </div>
+    </div>
+
+    <div
+        class="z-10 w-full max-w-lg p-8 bg-gradient-to-b from-gray-800/60 to-gray-900/70 backdrop-blur-md border border-gray-800/60 rounded-2xl shadow-2xl">
+        <!-- Header with RGB title -->
+        <div class="text-center mb-6">
+            <h1 aria-hidden="true"
+                class="text-3xl sm:text-4xl font-extrabold tracking-tight bg-clip-text text-transparent rgb-title">
+                GYM LAROCA
+            </h1>
+            <p class="mt-2 text-sm text-gray-300/75">
+                Inicia sesión en tu cuenta
+            </p>
+        </div>
+
+        <form (ngSubmit)="onLogin()" #loginForm="ngForm" class="space-y-4">
+            <!-- Email -->
+            <div>
+                <label for="email" class="text-xs text-gray-400 font-medium block mb-2">Correo</label>
+                <div class="relative">
+                    <input id="email" name="email" type="email" required [(ngModel)]="email" autocomplete="username"
+                        class="peer w-full rounded-xl bg-gray-800/60 border border-gray-700 px-4 py-3 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-0"
+                        placeholder="correo123@gmail.com" />
+                    <span class="absolute right-3 top-3 text-gray-400 text-sm peer-focus:text-red-400 transition-colors"
+                        aria-hidden="true"></span>
+                    <span class="block h-0.5 bg-transparent peer-focus:bg-red-500 transition-all mt-2"></span>
+                </div>
+            </div>
+
+            <!-- Password -->
+            <div>
+                <label for="password" class="text-xs text-gray-400 font-medium block mb-2">Contraseña</label>
+                <div class="relative">
+                    <input id="password" name="password" [type]="showPassword ? 'text' : 'password'" required
+                        [(ngModel)]="password" autocomplete="current-password"
+                        class="peer w-full rounded-xl bg-gray-800/60 border border-gray-700 px-4 py-3 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-0"
+                        placeholder="••••••••" />
+
+                    <!-- SVG toggle eye -->
+                    <button type="button" (click)="togglePassword()" aria-label="Mostrar u ocultar contraseña"
+                        class="absolute right-3 password-eye-btn text-gray-400 hover:text-red-400 transition-colors">
+                        <ng-container *ngIf="!showPassword">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                class="w-5 h-5 transition-transform duration-200 transform hover:scale-110"
+                                fill="currentColor">
+                                <path
+                                    d="M2 5.27L3.28 4L20 20.72L18.73 22l-3.08-3.08c-1.15.38-2.37.58-3.65.58c-5 0-9.27-3.11-11-7.5c.69-1.76 1.79-3.31 3.19-4.54zM12 9a3 3 0 0 1 3 3a3 3 0 0 1-.17 1L11 9.17A3 3 0 0 1 12 9m0-4.5c5 0 9.27 3.11 11 7.5a11.8 11.8 0 0 1-4 5.19l-1.42-1.43A9.86 9.86 0 0 0 20.82 12A9.82 9.82 0 0 0 12 6.5c-1.09 0-2.16.18-3.16.5L7.3 5.47c1.44-.62 3.03-.97 4.7-.97M3.18 12A9.82 9.82 0 0 0 12 17.5c.69 0 1.37-.07 2-.21L11.72 15A3.064 3.064 0 0 1 9 12.28L5.6 8.87c-.99.85-1.82 1.91-2.42 3.13" />
+                            </svg>
+                        </ng-container>
+
+                        <ng-container *ngIf="showPassword">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                class="w-5 h-5 transition-transform duration-200 transform hover:scale-110" fill="none"
+                                stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M2.458 12C3.732 7.943 7.522 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.478 0-8.268-2.943-9.542-7z" />
+                                <circle cx="12" cy="12" r="3" />
+                            </svg>
+                        </ng-container>
+                    </button>
+
+                    <span class="block h-0.5 bg-transparent peer-focus:bg-red-500 transition-all mt-2"></span>
+                </div>
+            </div>
+
+            <!-- Error -->
+            <div *ngIf="error" class="text-sm text-red-200 bg-red-900/30 border border-red-700/30 px-3 py-2 rounded-lg">
+                {{ error }}
+            </div>
+
+            <!-- Actions -->
+            <div class="flex items-center justify-end gap-4">
+                <a class="text-sm text-red-400 hover:underline" routerLink="/forgot-password">¿Olvidaste tu
+                    contraseña?</a>
+            </div>
+
+            <!-- Botón principal -->
+            <button type="submit" [disabled]="isLoading"
+                class="w-full inline-flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-red-600 via-red-500 to-rose-500 hover:from-red-700 hover:to-rose-600 text-white font-semibold shadow-lg transition-transform transform active:scale-98 disabled:opacity-50">
+                <svg *ngIf="!isLoading" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2"
+                    viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M12 5l7 7-7 7"></path>
+                </svg>
+                <svg *ngIf="isLoading" class="animate-spin w-5 h-5" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" stroke-linecap="round"
+                        class="opacity-25"></circle>
+                    <path d="M4 12a8 8 0 018-8" stroke="currentColor" stroke-width="4" stroke-linecap="round"></path>
+                </svg>
+                <span>{{ isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión' }}</span>
+            </button>
+        </form>
+
+        <!-- Footer -->
+        <p class="mt-6 text-center text-xs text-gray-500">
+            © {{ currentYear }} Gym LaRoca — Todos los derechos reservados
+        </p>
+    </div>
+</div>

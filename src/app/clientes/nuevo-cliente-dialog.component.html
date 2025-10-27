@@ -1,0 +1,90 @@
+<div class="w-full min-h-full bg-gradient-to-b from-gray-900 via-gray-900/95 to-gray-950 rounded-none shadow-none p-0 m-0">
+    <div class="bg-gray-900 border-b border-gray-800 px-8 py-6 rounded-none">
+        <h2 class="text-2xl font-extrabold text-white tracking-tight mb-1">Inscripción de Nuevo Cliente</h2>
+        <p class="text-sm text-gray-400">Complete todos los campos para registrar un nuevo socio del gimnasio</p>
+    </div>
+    <div class="p-6 md:p-8">
+        <!-- Datos Personales -->
+        <div class="mb-8">
+            <h3 class="font-semibold text-white mb-4 text-lg flex items-center gap-2">
+                                <svg class="h-6 w-6 text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                    <path fill="currentColor" d="M12 4a4 4 0 0 1 4 4a4 4 0 0 1-4 4a4 4 0 0 1-4-4a4 4 0 0 1 4-4m0 10c4.42 0 8 1.79 8 4v2H4v-2c0-2.21 3.58-4 8-4"/>
+                                </svg>
+                Datos Personales
+            </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                <div class="relative">
+                    <input type="text" id="name" [(ngModel)]="client.name" name="name" required
+                        class="peer w-full px-4 py-3 border border-gray-700 bg-gray-800 text-white rounded-lg focus:ring-2 focus:ring-red-400 focus:border-transparent placeholder-transparent"
+                        placeholder="Nombre/s *" />
+                    <label for="name"
+                        class="absolute left-4 top-2 text-gray-400 text-xs transition-all duration-200
+                        peer-focus:-top-4 peer-focus:text-xs peer-focus:text-red-400
+                        peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500
+                        peer-not-placeholder-shown:-top-4 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:text-red-400">Nombre/s
+                        *</label>
+                </div>
+                <div class="relative">
+                    <input type="text" id="lastName" [(ngModel)]="client.lastName" name="lastName" required
+                        class="peer w-full px-4 py-3 border border-gray-700 bg-gray-800 text-white rounded-lg focus:ring-2 focus:ring-red-400 focus:border-transparent placeholder-transparent"
+                        placeholder="Apellido/s *" />
+                    <label for="lastName"
+                        class="absolute left-4 top-2 text-gray-400 text-xs transition-all duration-200
+                        peer-focus:-top-4 peer-focus:text-xs peer-focus:text-red-400
+                        peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500
+                        peer-not-placeholder-shown:-top-4 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:text-red-400">Apellido/s
+                        *</label>
+                </div>
+                <div class="relative">
+                    <input type="text" id="dni" [(ngModel)]="client.dni" name="dni" required
+                        class="peer w-full px-4 py-3 border border-gray-700 bg-gray-800 text-white rounded-lg focus:ring-2 focus:ring-red-400 focus:border-transparent placeholder-transparent"
+                        placeholder="DNI *" />
+                    <label for="dni"
+                        class="absolute left-4 top-2 text-gray-400 text-xs transition-all duration-200
+                        peer-focus:-top-4 peer-focus:text-xs peer-focus:text-red-400
+                        peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500
+                        peer-not-placeholder-shown:-top-4 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:text-red-400">DNI
+                        *</label>
+                </div>
+                <div class="relative">
+                    <input type="text" id="phone" [(ngModel)]="client.phone" name="phone" required
+                        class="peer w-full px-4 py-3 border border-gray-700 bg-gray-800 text-white rounded-lg focus:ring-2 focus:ring-red-400 focus:border-transparent placeholder-transparent"
+                        placeholder="Teléfono *" />
+                    <label for="phone"
+                        class="absolute left-4 top-2 text-gray-400 text-xs transition-all duration-200
+                        peer-focus:-top-4 peer-focus:text-xs peer-focus:text-red-400
+                        peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500
+                        peer-not-placeholder-shown:-top-4 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:text-red-400">Teléfono
+                        *</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tipo de Membresía (solo Pase Libre) -->
+        <div class="mb-6">
+            <h3 class="font-semibold text-white mb-2">Tipo de Membresía</h3>
+            <div class="w-full flex items-center gap-2 bg-gray-800 border border-gray-700 rounded-lg p-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-red-500" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2l4 -4" />
+                </svg>
+                <span class="text-lg font-semibold text-red-400">Pase Libre</span>
+            </div>
+        </div>
+
+        <!-- Botón Registrar -->
+        <div class="flex justify-center">
+            <button (click)="saveClient()"
+                class="px-6 py-3 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors w-full shadow-md">
+                Registrar Inscripción
+            </button>
+        </div>
+
+        <!-- Aviso -->
+        <div class="mt-4 text-center text-xs text-gray-400">
+            Al registrarse, el cliente acepta los términos y condiciones del gimnasio.<br>
+            Los campos marcados con (*) son obligatorios.
+        </div>
+    </div>
+</div>

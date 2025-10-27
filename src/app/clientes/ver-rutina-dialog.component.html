@@ -1,0 +1,26 @@
+<div
+  class="p-6 max-w-lg w-full bg-gradient-to-b from-gray-900 via-gray-900/95 to-gray-950 rounded-lg border border-gray-800">
+  <h2 class="text-2xl font-bold text-red-600 mb-2">Rutina de {{ data.cliente.name }}</h2>
+  <div *ngIf="data.rutina; else noRutina">
+    <p class="mb-4 text-gray-300"><span class="font-semibold text-gray-400">Objetivo:</span> {{ data.rutina.objetivo }}
+    </p>
+    <div *ngFor="let dia of data.rutina.ejercicios" class="mb-6">
+      <h3 class="text-lg font-semibold text-red-400 mb-1">Día: {{ dia.dia }}</h3>
+      <ul class="list-disc ml-6">
+        <li *ngFor="let ejercicio of dia.ejercicios">
+          <span class="font-medium text-white">{{ ejercicio.nombre }}</span>
+          <span class="text-gray-400" *ngIf="ejercicio.detalle">- {{ ejercicio.detalle }}</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <ng-template #noRutina>
+    <div class="text-gray-500 text-center py-8">
+      <p>Este cliente no tiene una rutina asignada.</p>
+    </div>
+  </ng-template>
+  <div class="flex justify-end mt-6">
+    <button (click)="close()"
+      class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">Cerrar</button>
+  </div>
+</div>

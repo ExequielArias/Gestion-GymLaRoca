@@ -1,0 +1,115 @@
+.rgb-title {
+    background-image: linear-gradient(90deg,
+            #ff0047 0%,
+            #ff7a00 10%,
+            #ffd500 20%,
+            #4cff6b 35%,
+            #00e0ff 55%,
+            #7a5cff 75%,
+            #ff4ec0 90%,
+            #ff0047 100%);
+    background-size: 300% 300%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: rgbShift 6s linear infinite;
+    text-shadow: 0 8px 30px rgba(0, 0, 0, 0.6), 0 1px 0 rgba(255, 0, 60, 0.04);
+    letter-spacing: 0.08em;
+}
+
+.rgb-title::after {
+    content: "";
+    display: block;
+    width: 100%;
+    height: 6px;
+    margin-top: 8px;
+    filter: blur(12px);
+    opacity: 0.35;
+    background: linear-gradient(90deg, rgba(255, 0, 71, 0.25), rgba(255, 170, 0, 0.2), rgba(0, 224, 255, 0.18));
+    border-radius: 8px;
+}
+
+@keyframes rgbShift {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+@keyframes blob {
+    0% {
+        transform: translateY(0px) scale(1);
+    }
+
+    33% {
+        transform: translateY(-12px) scale(1.06);
+    }
+
+    66% {
+        transform: translateY(6px) scale(0.98);
+    }
+
+    100% {
+        transform: translateY(0px) scale(1);
+    }
+}
+
+.animate-blob {
+    animation: blob 8s ease-in-out infinite;
+}
+
+.animation-delay-2000 {
+    animation-delay: 2s;
+}
+
+
+input:focus {
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.09);
+    border-color: rgba(239, 68, 68, 0.7);
+}
+
+.password-eye-btn {
+    top: 0;
+    bottom: 0;
+    margin: auto 0;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: translateY(-13%);
+}
+
+button:active {
+    transform: translateY(1px);
+}
+
+html,
+body {
+    height: 100%;
+}
+
+.z-10 {
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.z-10:hover {
+    transform: translateY(-4px);
+}
+
+@media (max-width: 420px) {
+    .rgb-title {
+        font-size: 1.6rem;
+    }
+
+    .z-10 {
+        padding: 1.25rem;
+    }
+}

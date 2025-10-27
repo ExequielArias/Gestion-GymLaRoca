@@ -1,0 +1,147 @@
+<!-- ...existing code... -->
+<div class="min-h-screen bg-gradient-to-b from-gray-900 via-gray-900/95 to-gray-950">
+    <div class="container mx-auto px-6 py-8">
+        <div class="bg-gray-900 rounded-lg shadow-sm p-6 border border-gray-800">
+            <!-- Buscar Cliente (lleva a evaluación) -->
+            <div *ngIf="activeTab === 'search'" class="space-y-6">
+                <h2 class="text-xl font-semibold text-white">Buscar Cliente</h2>
+                <p class="text-sm text-gray-400">Selecciona un cliente para crear o editar su rutina personalizada</p>
+                <div class="relative">
+                    <input type="text" placeholder="Buscar cliente..." [(ngModel)]="searchTerm"
+                        (input)="filterClients()"
+                        class="w-full pl-10 pr-4 py-3 border border-gray-700 bg-gray-800 text-white rounded-lg focus:ring-2 focus:ring-red-400 focus:border-transparent placeholder-gray-400" />
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 absolute left-3 top-3.5"
+                        viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd"
+                            d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                            clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div class="space-y-3">
+                    <div *ngFor="let client of filteredClients"
+                        class="p-4 border border-gray-800 bg-gray-800 rounded-lg flex justify-between items-start">
+                        <div>
+                            <h3 class="font-semibold text-white flex items-center gap-2">
+                                {{ client.name }}
+                                <span *ngIf="client.tieneRutina"
+                                    class="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-green-900/10 text-green-400 border border-green-400">Con
+                                    rutina</span>
+                                <span *ngIf="!client.tieneRutina"
+                                    class="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-900 text-gray-500 border border-gray-700">Sin
+                                    rutina</span>
+                            </h3>
+                            <p class="text-sm text-gray-400">DNI: {{ client.dni }}</p>
+                            <p class="text-sm text-gray-400">Tel: {{ client.phone }}</p>
+                        </div>
+                        <div class="flex flex-col gap-2 text-right">
+                            <button type="button"
+                                class="px-3 py-1 rounded bg-red-600 text-white text-xs font-semibold hover:bg-red-700"
+                                (click)="crearOModificarRutina(client)">
+                                {{ client.tieneRutina ? 'Modificar rutina' : 'Crear rutina' }}
+                            </button>
+                            <button
+                                class="px-3 py-1 rounded bg-gray-700 text-gray-300 text-xs font-semibold hover:bg-gray-600 disabled:bg-gray-900 disabled:text-gray-600"
+                                [disabled]="!client.tieneRutina" (click)="verRutinaPreview(client)">
+                                Ver rutina
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Evaluación y creación/edición de rutina personalizada -->
+            <div *ngIf="isEvaluationTab" class="space-y-6">
+                <h2 class="text-xl font-semibold text-white">Evaluación y Rutina de {{ cliente?.name }}</h2>
+                <form class="space-y-4" #rutinaForm="ngForm" autocomplete="off">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-400 mb-1">Objetivo</label>
+                        <input type="text" name="objetivo" [(ngModel)]="rutina.objetivo"
+                            class="w-full border border-gray-700 bg-gray-800 text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-400 focus:border-transparent placeholder-gray-400"
+                            placeholder="Ej: Ganar masa muscular" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-400 mb-1">Días de entrenamiento</label>
+                        <div *ngFor="let dia of rutina.dias; let i = index"
+                            class="mb-4 border border-gray-800 rounded-lg p-3 bg-gray-800">
+                            <div class="flex items-center mb-2">
+                                <input type="text" [(ngModel)]="dia.nombre" name="dia-nombre-{{i}}"
+                                    class="flex-1 border border-gray-700 bg-gray-900 text-white rounded-lg px-2 py-1 mr-2 placeholder-gray-400"
+                                    placeholder="Nombre del día (Ej: Lunes)" />
+                                <button type="button" class="text-red-400 hover:text-red-700"
+                                    (click)="eliminarDia(i)">Eliminar</button>
+                            </div>
+                            <div *ngFor="let ejercicio of dia.ejercicios; let j = index"
+                                class="flex items-center mb-1">
+                                <input type="text" [(ngModel)]="ejercicio.nombre"
+                                    name="ejercicio-nombre-{{i}}-{{j}}"
+                                    class="flex-1 border border-gray-700 bg-gray-900 text-white rounded-lg px-2 py-1 mr-2 placeholder-gray-400"
+                                    placeholder="Ejercicio (Ej: Sentadillas)" />
+                                <input type="text" [(ngModel)]="ejercicio.detalle"
+                                    name="ejercicio-detalle-{{i}}-{{j}}"
+                                    class="w-32 border border-gray-700 bg-gray-900 text-white rounded-lg px-2 py-1 mr-2 placeholder-gray-400"
+                                    placeholder="Detalle (Ej: 4x12)" />
+                                <button type="button" class="text-red-400 hover:text-red-700"
+                                    (click)="eliminarEjercicio(i, j)">Quitar</button>
+                            </div>
+                            <button type="button"
+                                class="mt-2 px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+                                (click)="agregarEjercicio(i)">Agregar Ejercicio</button>
+                        </div>
+                        <button type="button"
+                            class="mt-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                            (click)="agregarDia()">Agregar Día</button>
+                    </div>
+                    <div class="flex gap-4 mt-4">
+                        <button type="button" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                            (click)="guardarRutina()">Guardar Rutina</button>
+                        <button type="button"
+                            class="px-4 py-2 bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600"
+                            (click)="activeTab = 'search'">Cancelar</button>
+                        <button *ngIf="cliente && cliente.tieneRutina" type="button"
+                            class="px-4 py-2 bg-red-900 text-red-200 rounded-lg hover:bg-red-700"
+                            (click)="eliminarRutina()">Eliminar Rutina</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Vista previa: buscar rutina de un cliente y mostrar opciones PDF/WhatsApp -->
+            <div *ngIf="isPreviewTab" class="space-y-6">
+                <div class="flex justify-between mb-4">
+                    <button (click)="activeTab = 'search'"
+                        class="px-4 py-2 bg-gray-700 text-gray-300 rounded hover:bg-gray-600 transition-colors flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20"
+                            fill="currentColor">
+                            <path fill-rule="evenodd"
+                                d="M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        Volver
+                    </button>
+                </div>
+                <h2 class="text-xl font-semibold text-white">Vista Previa de Rutina</h2>
+                <div #previewContent class="mt-6 p-4 border border-gray-800 rounded-lg bg-gray-800">
+                    <h3 class="font-semibold text-white mb-2">Rutina de {{ clientePreview.name }}</h3>
+                    <p class="mb-2 text-sm text-gray-400">Objetivo: <span class="font-medium text-white">{{
+                            rutinaPreview.objetivo }}</span></p>
+                    <div *ngFor="let dia of rutinaPreview.dias">
+                        <div class="mb-2">
+                            <strong class="text-red-400">{{ dia.nombre }}</strong>
+                            <ul class="list-disc ml-6 text-gray-300">
+                                <li *ngFor="let ejercicio of dia.ejercicios">
+                                    {{ ejercicio.nombre }} <span *ngIf="ejercicio.detalle">({{ ejercicio.detalle
+                                        }})</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="flex gap-4 mt-4">
+                        <button class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                            (click)="descargarPDF()">Descargar PDF</button>
+                        <button class="px-4 py-2 bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600"
+                            (click)="enviarWhatsApp()">Enviar por WhatsApp</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

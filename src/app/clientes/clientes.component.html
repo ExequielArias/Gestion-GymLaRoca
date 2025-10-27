@@ -1,0 +1,68 @@
+<div class="min-h-screen bg-gradient-to-b from-gray-900 via-gray-900/95 to-gray-950">
+    <div class="container mx-auto max-w-7xl px-6 py-10">
+        <br>
+        <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+            <div class="flex gap-4">
+                <button
+                    class="px-5 py-2 bg-red-600 text-white font-medium rounded-lg shadow-sm hover:bg-red-700 transition"
+                    (click)="openNewClientDialog()">
+                    <svg class="inline h-5 w-5 mr-2 -mt-1" fill="none" stroke="currentColor" stroke-width="2"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Nuevo Cliente
+                </button>
+            </div>
+            <div class="flex gap-2">
+                <input type="text" placeholder="Buscar cliente..."
+                    class="border border-gray-700 bg-gray-900 text-white rounded-lg px-4 py-2 focus:border-red-400 focus:ring-1 focus:ring-red-200 transition placeholder-gray-400"
+                    [(ngModel)]="searchTerm" (input)="filterClients()">
+            </div>
+        </div>
+
+                <div *ngIf="filteredClients.length === 0" class="text-center text-gray-500 py-16 text-base">
+                        <svg class="mx-auto mb-4 h-16 w-16 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                                <circle cx="9" cy="7" r="4"/>
+                                <path d="m17 8l5 5m0-5l-5 5"/>
+                            </g>
+                        </svg>
+                        <span class="block font-medium">
+                            {{ clients.length === 0 ? 'Aún no hay clientes registrados.' : 'No se encontraron clientes para la búsqueda.' }}
+                        </span>
+                </div>
+        <div *ngIf="filteredClients.length > 0" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div *ngFor="let client of filteredClients"
+                class="bg-gray-900 border border-gray-800 hover:shadow-lg p-7 rounded-xl transition-all duration-200">
+                <div class="flex items-center mb-5">
+                    <div class="w-14 h-14 bg-gray-800 rounded-full flex items-center justify-center mr-5 shadow-sm">
+                        <span class="text-white font-bold text-xl">{{ client.name.charAt(0) }}</span>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-lg text-white">{{ client.name }}</h3>
+                    </div>
+                </div>
+                <div class="space-y-2 text-base">
+                    <p><span class="font-medium text-gray-400">Teléfono:</span> <span class="text-gray-300">{{
+                            client.phone }}</span></p>
+                    <p><span class="font-medium text-gray-400">DNI:</span> <span class="text-gray-300">{{ client.dni
+                            }}</span></p>
+                </div>
+                <div class="flex gap-2 mt-6">
+                    <button
+                        class="px-4 py-1 bg-gray-800 text-red-400 border border-red-400 rounded-lg text-sm font-medium hover:bg-red-700 hover:text-white transition"
+                        (click)="editClient(client)">Editar</button>
+                    <button
+                        class="px-4 py-1 bg-gray-800 text-red-400 border border-red-400 rounded-lg text-sm font-medium hover:bg-red-700 hover:text-white transition"
+                        (click)="viewRoutine(client)">Ver Rutina</button>
+                    <button
+                        class="px-4 py-1 bg-red-900 text-red-200 border border-red-700 rounded-lg text-sm font-medium hover:bg-red-700 hover:text-white transition"
+                        (click)="deleteClient(client)">
+                        Eliminar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
