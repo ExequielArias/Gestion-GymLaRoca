@@ -3,11 +3,13 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule, NgIf, NgForOf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RutinasService } from './rutinas.service';
+import { MatDialog } from '@angular/material/dialog';
+import { ErrorDialogComponent } from '../clientes/error-dialog.component';
 
 @Component({
   selector: 'app-rutinas',
   standalone: true,
-  imports: [CommonModule, NgIf, NgForOf, FormsModule],
+  imports: [CommonModule, NgIf, NgForOf, FormsModule, ErrorDialogComponent],
   templateUrl: './rutinas.component.html',
   styleUrls: ['./rutinas.component.css']
 })
@@ -22,7 +24,7 @@ export class RutinasComponent implements OnInit {
   rutinaPreview: any = null;
   clientePreview: any = null;
 
-  constructor(private rutinasService: RutinasService) { }
+  constructor(private rutinasService: RutinasService, private dialog: MatDialog) { }
 
   async ngOnInit() {
     await this.loadClients();
@@ -33,7 +35,9 @@ export class RutinasComponent implements OnInit {
       this.clients = await this.rutinasService.getClientesConRutina();
       this.filterClients();
     } catch (e: any) {
-      alert('Error al cargar clientes: ' + e.message);
+      this.dialog.open(ErrorDialogComponent, {
+        data: { message: 'Error al cargar clientes: ' + e.message }
+      });
       this.clients = [];
       this.filteredClients = [];
     }
@@ -91,13 +95,28 @@ export class RutinasComponent implements OnInit {
 
   async guardarRutina() {
     if (!this.cliente) return;
+    // Validar rutina vacía: no permitir guardar si no hay días o si todos los días están vacíos
+    // Validar que haya al menos un día con nombre y al menos un ejercicio con nombre
+    if (!this.rutina.dias ||
+        this.rutina.dias.length === 0 ||
+        this.rutina.dias.every((dia: any) => !dia.nombre.trim() || !dia.ejercicios || dia.ejercicios.length === 0 || dia.ejercicios.every((ej: any) => !ej.nombre || !ej.nombre.trim()))
+    ) {
+      this.dialog.open(ErrorDialogComponent, {
+        data: { message: 'No se puede guardar una rutina vacía. Agregue al menos un día y un ejercicio con nombre.' }
+      });
+      return;
+    }
     try {
       await this.rutinasService.saveRutina(this.cliente.id, this.rutina);
-      alert('Rutina guardada correctamente');
+      this.dialog.open(ErrorDialogComponent, {
+        data: { message: 'Rutina guardada correctamente' }
+      });
       this.activeTab = 'search';
       await this.loadClients();
     } catch (e: any) {
-      alert('Error al guardar rutina: ' + e.message);
+      this.dialog.open(ErrorDialogComponent, {
+        data: { message: 'Error al guardar rutina: ' + e.message }
+      });
     }
   }
 
@@ -106,20 +125,26 @@ export class RutinasComponent implements OnInit {
     if (!confirm('¿Seguro que deseas eliminar la rutina de este cliente?')) return;
     try {
       await this.rutinasService.deleteRutina(this.cliente.id);
-      alert('Rutina eliminada correctamente');
+      this.dialog.open(ErrorDialogComponent, {
+        data: { message: 'Rutina eliminada correctamente' }
+      });
       this.activeTab = 'search';
       await this.loadClients();
       this.cliente = null;
       this.rutina = { objetivo: '', dias: [] };
     } catch (e: any) {
-      alert('Error al eliminar rutina: ' + e.message);
+      this.dialog.open(ErrorDialogComponent, {
+        data: { message: 'Error al eliminar rutina: ' + e.message }
+      });
     }
   }
 
   async verRutinaPreview(cliente: any) {
     const rutina = await this.rutinasService.getRutinaByClienteId(cliente.id);
     if (!rutina) {
-      alert('No se pudo cargar la rutina para vista previa.');
+      this.dialog.open(ErrorDialogComponent, {
+        data: { message: 'No se pudo cargar la rutina para vista previa.' }
+      });
       return;
     }
     // Transformar la rutina para que tenga dias y ejercicios
@@ -228,7 +253,9 @@ export class RutinasComponent implements OnInit {
 
   enviarWhatsApp() {
     if (!this.rutinaPreview || !this.clientePreview) {
-      alert('No hay rutina para enviar.');
+      this.dialog.open(ErrorDialogComponent, {
+        data: { message: 'No hay rutina para enviar.' }
+      });
       return;
     }
     let mensaje = `*Rutina de ${this.clientePreview.name}*\n`;

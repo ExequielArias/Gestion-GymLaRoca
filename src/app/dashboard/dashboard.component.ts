@@ -1,24 +1,19 @@
+
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Chart, registerables } from 'chart.js';
+import { NgChartsModule } from 'ng2-charts';
+import { ChartConfiguration, ChartOptions, ChartType, ChartData, ChartDataset, Chart } from 'chart.js';
 import { supabase } from '../supabase.client';
-
-Chart.register(...registerables);
 
 @Component({
     selector: 'app-dashboard',
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, NgChartsModule],
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit {
-    private chartRefs: { [key: string]: Chart | null } = {
-        activeClientsChart: null,
-        newClientsChart: null,
-        attendanceChart: null,
-        membershipPie: null
-    };
+
     isLoading = true;
 
     // Totales para tarjetas resumen
@@ -26,6 +21,124 @@ export class DashboardComponent implements OnInit {
     totalClientesNuevos = 0;
     totalAsistenciasHoy = 0;
     totalTiposMembresia = 0;
+
+    // Chart.js ChartData para ng2-charts
+    activeClientsChartData: ChartData<'line'> = {
+        labels: [],
+        datasets: [
+            { data: [], label: 'Clientes activos', borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,0.15)', fill: true, tension: 0.3 }
+        ]
+    };
+    newClientsChartData: ChartData<'bar'> = {
+        labels: [],
+        datasets: [
+            { data: [], label: 'Clientes nuevos', backgroundColor: '#f87171', borderRadius: 8 }
+        ]
+    };
+    attendanceChartData: ChartData<'line'> = {
+        labels: [],
+        datasets: [
+            { data: [], label: 'Asistencias diarias', borderColor: '#facc15', backgroundColor: 'rgba(250,204,21,0.15)', fill: true, tension: 0.3 }
+        ]
+    };
+    membershipPieData: ChartData<'doughnut'> = {
+        labels: [],
+        datasets: [
+            { data: [], backgroundColor: ['#ef4444', '#22c55e', '#3b82f6', '#a855f7', '#f59e0b'] }
+        ]
+    };
+
+    // Opciones minimalistas y plugins
+    lineChartOptions: ChartOptions<'line'> = {
+        responsive: true,
+        plugins: {
+            legend: { display: false },
+            tooltip: { enabled: true },
+        },
+        scales: {
+            x: {
+                ticks: {
+                    color: '#ccc',
+                    callback: function(value, index, ticks) {
+                        // value es el índice del label
+                        const labels = this.getLabels ? this.getLabels() : (this.chart?.data?.labels || []);
+                        const idx = typeof value === 'number' ? value : parseInt(value as any, 10);
+                        const label = labels[idx] || value;
+                        // Si es fecha tipo 'YYYY-MM-DD', mostrar 'DD/MM'
+                        if (typeof label === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(label)) {
+                            const [year, month, day] = label.split('-');
+                            return `${day}/${month}`;
+                        }
+                        // Si es 'YYYY-MM', mostrar 'Mes Año'
+                        if (typeof label === 'string' && label.includes('-')) {
+                            const [year, month] = label.split('-');
+                            const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+                            const m = parseInt(month, 10);
+                            return `${monthNames[m-1]} ${year}`;
+                        }
+                        return typeof label === 'string' || typeof label === 'number' ? label : '';
+                    }
+                },
+                grid: { color: '#222' }
+            },
+            y: {
+                ticks: {
+                    color: '#ccc',
+                    precision: 0,
+                    callback: function(value) {
+                        // Solo mostrar enteros
+                        return Number.isInteger(value) ? value : '';
+                    }
+                },
+                grid: { color: '#222' }
+            }
+        }
+    };
+    barChartOptions: ChartOptions<'bar'> = {
+        responsive: true,
+        plugins: {
+            legend: { display: false },
+            tooltip: { enabled: true },
+        },
+        scales: {
+            x: {
+                ticks: {
+                    color: '#ccc',
+                    callback: function(value, index, ticks) {
+                        const labels = this.getLabels ? this.getLabels() : (this.chart?.data?.labels || []);
+                        const idx = typeof value === 'number' ? value : parseInt(value as any, 10);
+                        const label = labels[idx] || value;
+                        if (typeof label === 'string' && label.includes('-')) {
+                            const [year, month] = label.split('-');
+                            const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+                            const m = parseInt(month, 10);
+                            return `${monthNames[m-1]} ${year}`;
+                        }
+                        return typeof label === 'string' || typeof label === 'number' ? label : '';
+                    }
+                },
+                grid: { color: '#222' }
+            },
+            y: {
+                ticks: {
+                    color: '#ccc',
+                    precision: 0,
+                    callback: function(value) {
+                        return Number.isInteger(value) ? value : '';
+                    }
+                },
+                grid: { color: '#222' }
+            }
+        }
+    };
+    pieChartOptions: ChartOptions<'doughnut'> = {
+        responsive: true,
+        plugins: {
+            legend: { display: true, labels: { color: '#fff', font: { size: 14 } }, position: 'bottom' },
+            tooltip: { enabled: true },
+        }
+    };
+    chartPlugins = [];
 
     constructor() { }
 
@@ -52,76 +165,44 @@ export class DashboardComponent implements OnInit {
         }
     }
 
-    // Destruye el gráfico anterior si existe
-    private destroyChart(chartId: string) {
-        if (this.chartRefs[chartId]) {
-            this.chartRefs[chartId]?.destroy();
-            this.chartRefs[chartId] = null;
-        }
-    }
-
     // 📈 CLIENTES ACTIVOS POR MES
     async renderActiveClientsChart() {
-        this.destroyChart('activeClientsChart');
         // Traer todos los pagos con cliente_id y fecha_vencimiento
-        const { data, error } = await supabase.from('pagos').select('cliente_id, fecha_vencimiento');
+        const { data, error } = await supabase.from('pagos').select('cliente_id, fecha_vencimiento, fecha_pago');
         if (error) {
             console.error('Error cargando pagos:', error.message);
             return;
         }
 
-        // Calcular clientes activos por mes (últimos 6 meses)
-        const now = new Date();
+        // Calcular clientes activos por día (últimos 30 días)
+        const today = new Date();
         const labels: string[] = [];
-        const date = new Date();
-        for (let i = 5; i >= 0; i--) {
-            const d = new Date(date.getFullYear(), date.getMonth() - i, 1);
-            const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-            labels.push(key);
-        }
-
-        // Para cada mes, contar clientes únicos con pago vigente en ese mes
         const dataArr: number[] = [];
-        for (const label of labels) {
-            const [year, month] = label.split('-').map(Number);
-            // Clientes con al menos un pago vigente en ese mes
+        for (let i = 29; i >= 0; i--) {
+            const d = new Date(today.getFullYear(), today.getMonth(), today.getDate() - i);
+            const key = d.toISOString().split('T')[0];
+            labels.push(key);
+            // Para cada día, contar clientes con pago vigente (fecha_pago <= d <= fecha_vencimiento)
             const clientesActivos = new Set<number>();
             data?.forEach(p => {
+                const pago = new Date(p.fecha_pago);
                 const venc = new Date(p.fecha_vencimiento);
-                // Si el pago está vigente en ese mes
-                if (
-                    venc.getFullYear() > year ||
-                    (venc.getFullYear() === year && venc.getMonth() + 1 >= month)
-                ) {
+                if (pago <= d && venc >= d) {
                     clientesActivos.add(p.cliente_id);
                 }
             });
             dataArr.push(clientesActivos.size);
         }
-        // El mes actual es el último
+        // El día actual es el último
         this.totalClientesActivos = dataArr[dataArr.length - 1];
 
-        this.chartRefs['activeClientsChart'] = new Chart('activeClientsChart', {
-            type: 'line',
-            data: {
-                labels,
-                datasets: [{
-                    label: 'Clientes activos',
-                    data: dataArr,
-                    borderColor: '#ef4444',
-                    backgroundColor: 'rgba(239,68,68,0.3)',
-                    fill: true,
-                    tension: 0.3
-                }]
-            },
-            options: this.chartOptions()
-        });
+        this.activeClientsChartData.labels = labels;
+        this.activeClientsChartData.datasets[0].data = dataArr;
     }
 
     // 🧍‍♂️ CLIENTES NUEVOS POR MES
     async renderNewClientsChart() {
-        this.destroyChart('newClientsChart');
-        const { data, error } = await supabase.from('clientes').select('created_at');
+        const { data, error } = await supabase.from('clientes').select('fecha_alta');
         if (error) {
             console.error('Error cargando clientes:', error.message);
             return;
@@ -144,9 +225,10 @@ export class DashboardComponent implements OnInit {
             const start = new Date(year, month - 1, 1, 0, 0, 0, 0);
             // Último día del mes
             const end = new Date(year, month, 0, 23, 59, 59, 999);
-            // Contar clientes cuyo created_at está dentro de ese mes
+            // Contar clientes cuyo fecha_alta está dentro de ese mes
             const count = data?.filter(c => {
-                const fecha = new Date(c.created_at);
+                if (!c.fecha_alta) return false;
+                const fecha = new Date(c.fecha_alta);
                 return fecha >= start && fecha <= end;
             }).length || 0;
             dataArr.push(count);
@@ -154,23 +236,12 @@ export class DashboardComponent implements OnInit {
         // El mes actual es el último
         this.totalClientesNuevos = dataArr[dataArr.length - 1];
 
-        this.chartRefs['newClientsChart'] = new Chart('newClientsChart', {
-            type: 'bar',
-            data: {
-                labels,
-                datasets: [{
-                    label: 'Clientes nuevos',
-                    data: dataArr,
-                    backgroundColor: '#f87171'
-                }]
-            },
-            options: this.chartOptions()
-        });
+        this.newClientsChartData.labels = labels;
+        this.newClientsChartData.datasets[0].data = dataArr;
     }
 
     // 🕒 ASISTENCIAS (ÚLTIMOS 15 DÍAS)
     async renderAttendanceChart() {
-        this.destroyChart('attendanceChart');
         const today = new Date();
         const fromDate = new Date(today);
         fromDate.setDate(today.getDate() - 14); // 15 días incluyendo hoy
@@ -201,26 +272,12 @@ export class DashboardComponent implements OnInit {
         // Asistencias de hoy
         this.totalAsistenciasHoy = dataArr[dataArr.length - 1];
 
-        this.chartRefs['attendanceChart'] = new Chart('attendanceChart', {
-            type: 'line',
-            data: {
-                labels,
-                datasets: [{
-                    label: 'Asistencias diarias',
-                    data: dataArr,
-                    borderColor: '#facc15',
-                    backgroundColor: 'rgba(250,204,21,0.3)',
-                    fill: true,
-                    tension: 0.3
-                }]
-            },
-            options: this.chartOptions()
-        });
+    this.attendanceChartData.labels = labels;
+    this.attendanceChartData.datasets[0].data = dataArr;
     }
 
     // 🍩 DISTRIBUCIÓN DE MEMBRESÍAS
     async renderMembershipPie() {
-        this.destroyChart('membershipPie');
         const { data, error } = await supabase.from('pagos').select('tipo_membresia');
         if (error) {
             console.error('Error cargando membresías:', error.message);
@@ -234,24 +291,8 @@ export class DashboardComponent implements OnInit {
         const dataArr = Object.values(counts);
         this.totalTiposMembresia = labels.length;
 
-        this.chartRefs['membershipPie'] = new Chart('membershipPie', {
-            type: 'doughnut',
-            data: {
-                labels,
-                datasets: [{
-                    data: dataArr,
-                    backgroundColor: ['#ef4444', '#22c55e', '#3b82f6', '#a855f7', '#f59e0b']
-                }]
-            },
-            options: {
-                plugins: {
-                    legend: {
-                        labels: { color: '#fff' },
-                        position: 'bottom'
-                    }
-                }
-            }
-        });
+    this.membershipPieData.labels = labels;
+    this.membershipPieData.datasets[0].data = dataArr;
     }
 
     // 🎨 Opciones globales de diseño para mantener coherencia

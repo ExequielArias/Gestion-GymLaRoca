@@ -1,5 +1,6 @@
 
 import { Component } from '@angular/core';
+import { ErrorDialogComponent } from '../clientes/error-dialog.component';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -9,7 +10,7 @@ import { supabase } from '../supabase.client';
 @Component({
   selector: 'app-asistencias',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, MatDialogModule],
+  imports: [CommonModule, RouterModule, FormsModule, MatDialogModule, ErrorDialogComponent],
   templateUrl: './asistencias.component.html',
   styleUrls: ['./asistencias.component.css']
 })
@@ -26,7 +27,7 @@ export class AsistenciasComponent {
   allowedAccesses = 0;
   deniedAccesses = 0;
 
-  constructor() {
+  constructor(private dialog: MatDialog) {
     this.loadAllAttendance();
     this.loadTodayAttendance();
   }
@@ -114,12 +115,16 @@ export class AsistenciasComponent {
       try {
         await this.registerAttendance(null, 'Denegado', 'Cliente no encontrado');
       } catch (e: any) {
-        alert('Error registrando asistencia: ' + (typeof e === 'object' && e && 'message' in e ? (e as any).message : e));
+        this.dialog.open(ErrorDialogComponent, {
+          data: { message: 'Error registrando asistencia: ' + (typeof e === 'object' && e && 'message' in e ? (e as any).message : e) }
+        });
       }
       try {
         await this.loadTodayAttendance();
       } catch (e: any) {
-        alert('Error cargando asistencias: ' + (typeof e === 'object' && e && 'message' in e ? (e as any).message : e));
+        this.dialog.open(ErrorDialogComponent, {
+          data: { message: 'Error cargando asistencias: ' + (typeof e === 'object' && e && 'message' in e ? (e as any).message : e) }
+        });
       }
       return;
     }

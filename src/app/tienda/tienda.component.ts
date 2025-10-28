@@ -1,4 +1,6 @@
 import { Component } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import { ErrorDialogComponent } from '../clientes/error-dialog.component';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -16,7 +18,7 @@ interface Product {
 @Component({
     selector: 'app-tienda',
     standalone: true,
-    imports: [CommonModule, RouterModule, FormsModule],
+    imports: [CommonModule, RouterModule, FormsModule, ErrorDialogComponent],
     templateUrl: './tienda.component.html'
 })
 export class TiendaComponent {
@@ -149,7 +151,7 @@ export class TiendaComponent {
     // Productos filtrados (por búsqueda y categoría)
     filteredProducts: Product[] = [...this.products];
 
-    constructor() { }
+    constructor(private dialog: MatDialog) { }
 
     // Filtrar productos por categoría y búsqueda
     setCategory(category: 'Todos' | 'Ropa' | 'Suplementos' | 'Bebidas') {
@@ -213,7 +215,9 @@ export class TiendaComponent {
     processSale() {
         if (this.cart.length === 0) return;
 
-        alert(`Venta procesada por $${this.getTotal().toLocaleString('es-AR')} con método de pago: ${this.selectedPaymentMethod}`);
+        this.dialog.open(ErrorDialogComponent, {
+            data: { message: `Venta procesada por $${this.getTotal().toLocaleString('es-AR')} con método de pago: ${this.selectedPaymentMethod}` }
+        });
         this.cart = [];
         this.showCart = false;
     }
