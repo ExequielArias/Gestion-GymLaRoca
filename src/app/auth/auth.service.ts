@@ -113,7 +113,6 @@ export class AuthService {
     this._user.set(null);
     localStorage.removeItem('auth_user');
     this.router.navigateByUrl('/login');
-    setTimeout(() => window.location.reload(), 100);
   }
 
   getCurrentUser(): User | null {
