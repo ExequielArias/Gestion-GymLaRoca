@@ -1,5 +1,5 @@
 <div class="min-h-screen bg-gradient-to-b from-gray-900 via-gray-900/95 to-gray-950 text-white">
-    <div class="container mx-auto px-6 py-10 space-y-10">
+    <div class="max-w-full w-full px-2 sm:px-4 lg:px-8 py-10 space-y-10">
         <h1 class="text-4xl font-extrabold text-center mb-10 text-red-400 tracking-wide">
             Panel de Estadísticas Generales!
         </h1>
@@ -11,32 +11,32 @@
 
         <ng-container *ngIf="!isLoading">
             <!-- Tarjetas resumen -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-8">
                 <div
-                    class="bg-gray-900 border border-gray-800 rounded-xl p-6 text-center shadow-lg hover:shadow-red-500/20 transition">
+                    class="bg-gray-900 border border-gray-800 rounded-2xl p-8 text-center shadow-xl hover:shadow-red-500/20 transition text-lg">
                     <p class="text-gray-400 text-sm">Clientes activos</p>
                     <h2 class="text-3xl font-bold text-red-400">{{ totalClientesActivos }}</h2>
                 </div>
                 <div
-                    class="bg-gray-900 border border-gray-800 rounded-xl p-6 text-center shadow-lg hover:shadow-red-500/20 transition">
+                    class="bg-gray-900 border border-gray-800 rounded-2xl p-8 text-center shadow-xl hover:shadow-red-500/20 transition text-lg">
                     <p class="text-gray-400 text-sm">Clientes nuevos (Por mes)</p>
                     <h2 class="text-3xl font-bold text-red-400">{{ totalClientesNuevos }}</h2>
                 </div>
                 <div
-                    class="bg-gray-900 border border-gray-800 rounded-xl p-6 text-center shadow-lg hover:shadow-red-500/20 transition">
+                    class="bg-gray-900 border border-gray-800 rounded-2xl p-8 text-center shadow-xl hover:shadow-red-500/20 transition text-lg">
                     <p class="text-gray-400 text-sm">Asistencias hoy</p>
                     <h2 class="text-3xl font-bold text-red-400">{{ totalAsistenciasHoy }}</h2>
                 </div>
                 <div
-                    class="bg-gray-900 border border-gray-800 rounded-xl p-6 text-center shadow-lg hover:shadow-red-500/20 transition">
+                    class="bg-gray-900 border border-gray-800 rounded-2xl p-8 text-center shadow-xl hover:shadow-red-500/20 transition text-lg">
                     <p class="text-gray-400 text-sm">Tipos de membresía</p>
                     <h2 class="text-3xl font-bold text-red-400">{{ totalTiposMembresia }}</h2>
                 </div>
             </div>
 
             <!-- Gráficos -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 mt-12">
-                <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 shadow-lg transition">
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-12 mt-16">
+                <div class="bg-gray-900 border border-gray-800 rounded-3xl p-12 shadow-2xl transition min-h-[480px] flex flex-col justify-between">
                     <h2 class="text-lg font-semibold mb-4 text-red-400">Clientes Activos</h2>
                     <canvas baseChart
                         [data]="activeClientsChartData"
@@ -48,7 +48,7 @@
                     </canvas>
                 </div>
 
-                <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 shadow-lg transition">
+                <div class="bg-gray-900 border border-gray-800 rounded-3xl p-12 shadow-2xl transition min-h-[480px] flex flex-col justify-between">
                     <h2 class="text-lg font-semibold mb-4 text-red-400">Clientes Nuevos por Mes</h2>
                     <canvas baseChart
                         [data]="newClientsChartData"
@@ -60,7 +60,7 @@
                     </canvas>
                 </div>
 
-                <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 shadow-lg transition">
+                <div class="bg-gray-900 border border-gray-800 rounded-3xl p-12 shadow-2xl transition min-h-[480px] flex flex-col justify-between">
                     <h2 class="text-lg font-semibold mb-4 text-red-400">Asistencias (Últimos 15 días)</h2>
                     <canvas baseChart
                         [data]="attendanceChartData"
@@ -72,7 +72,7 @@
                     </canvas>
                 </div>
 
-                <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 shadow-lg transition">
+                <div class="bg-gray-900 border border-gray-800 rounded-3xl p-12 shadow-2xl transition min-h-[480px] flex flex-col justify-between">
                     <h2 class="text-lg font-semibold mb-4 text-red-400">Distribución de Membresías</h2>
                     <canvas baseChart
                         [data]="membershipPieData"
