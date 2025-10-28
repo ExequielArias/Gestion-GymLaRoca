@@ -27,7 +27,7 @@ import { AuthService } from './auth/auth.service';
     <main class="flex-1">
       <router-outlet></router-outlet>
     </main>
-    <footer class="bg-gray-900 text-white py-12 px-6">
+    <!-- <footer class="bg-gray-900 text-white py-12 px-6">
       <div class="container mx-auto max-w-6xl text-center">
         <h3 class="text-3xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-400">
           Gym LaRoca
@@ -37,7 +37,7 @@ import { AuthService } from './auth/auth.service';
           <p>© 2025 Gym LaRoca. Todos los derechos reservados.</p>
         </div>
       </div>
-    </footer>
+    </footer> -->
     <style>
       .tab-link {
         padding: 0.5rem 1.5rem;

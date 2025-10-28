@@ -1,4 +1,6 @@
 import { Component, Inject } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import { ErrorDialogComponent } from './error-dialog.component';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -7,7 +9,7 @@ import { MatButtonModule } from '@angular/material/button';
 @Component({
   selector: 'app-registrar-pago-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatButtonModule],
+  imports: [CommonModule, FormsModule, MatButtonModule, ErrorDialogComponent],
   templateUrl: './registrar-pago-dialog.component.html'
 })
 export class RegistrarPagoDialogComponent {
@@ -18,20 +20,27 @@ export class RegistrarPagoDialogComponent {
 
   constructor(
     public dialogRef: MatDialogRef<RegistrarPagoDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any
+    @Inject(MAT_DIALOG_DATA) public data: any,
+    private dialog: MatDialog
   ) {}
 
   confirmar() {
     if (this.pagoRealizado === null) {
-      alert('Debe indicar si el cliente pagó o no.');
+      this.dialog.open(ErrorDialogComponent, {
+        data: { message: 'Debe indicar si el cliente pagó o no.' }
+      });
       return;
     }
     if (this.pagoRealizado && (this.monto === null || this.monto <= 0)) {
-      alert('Debe ingresar el monto pagado.');
+      this.dialog.open(ErrorDialogComponent, {
+        data: { message: 'Debe ingresar el monto pagado.' }
+      });
       return;
     }
     if (this.pagoRealizado && (this.meses === null || this.meses < 1)) {
-      alert('Debe ingresar la cantidad de meses a pagar (mínimo 1).');
+      this.dialog.open(ErrorDialogComponent, {
+        data: { message: 'Debe ingresar la cantidad de meses a pagar (mínimo 1).' }
+      });
       return;
     }
     if (this.pagoRealizado) {

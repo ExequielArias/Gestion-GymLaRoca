@@ -19,7 +19,7 @@
                 </div>
                 <div
                     class="bg-gray-900 border border-gray-800 rounded-xl p-6 text-center shadow-lg hover:shadow-red-500/20 transition">
-                    <p class="text-gray-400 text-sm">Clientes nuevos</p>
+                    <p class="text-gray-400 text-sm">Clientes nuevos (Por mes)</p>
                     <h2 class="text-3xl font-bold text-red-400">{{ totalClientesNuevos }}</h2>
                 </div>
                 <div
@@ -36,24 +36,52 @@
 
             <!-- Gráficos -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-10 mt-12">
-                <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 shadow-lg hover:shadow-red-700/20 transition">
-                    <h2 class="text-lg font-semibold mb-4 text-red-400">Clientes Activos por Mes</h2>
-                    <canvas id="activeClientsChart" class="w-full h-64"></canvas>
+                <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 shadow-lg transition">
+                    <h2 class="text-lg font-semibold mb-4 text-red-400">Clientes Activos</h2>
+                    <canvas baseChart
+                        [data]="activeClientsChartData"
+                        [options]="lineChartOptions"
+                        [type]="'line'"
+                        [legend]="false"
+                        [plugins]="chartPlugins"
+                        class="w-full h-64">
+                    </canvas>
                 </div>
 
-                <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 shadow-lg hover:shadow-red-700/20 transition">
+                <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 shadow-lg transition">
                     <h2 class="text-lg font-semibold mb-4 text-red-400">Clientes Nuevos por Mes</h2>
-                    <canvas id="newClientsChart" class="w-full h-64"></canvas>
+                    <canvas baseChart
+                        [data]="newClientsChartData"
+                        [options]="barChartOptions"
+                        [type]="'bar'"
+                        [legend]="false"
+                        [plugins]="chartPlugins"
+                        class="w-full h-64">
+                    </canvas>
                 </div>
 
-                <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 shadow-lg hover:shadow-red-700/20 transition">
+                <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 shadow-lg transition">
                     <h2 class="text-lg font-semibold mb-4 text-red-400">Asistencias (Últimos 15 días)</h2>
-                    <canvas id="attendanceChart" class="w-full h-64"></canvas>
+                    <canvas baseChart
+                        [data]="attendanceChartData"
+                        [options]="lineChartOptions"
+                        [type]="'line'"
+                        [legend]="false"
+                        [plugins]="chartPlugins"
+                        class="w-full h-64">
+                    </canvas>
                 </div>
 
-                <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 shadow-lg hover:shadow-red-700/20 transition">
+                <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 shadow-lg transition">
                     <h2 class="text-lg font-semibold mb-4 text-red-400">Distribución de Membresías</h2>
-                    <canvas id="membershipPie" class="w-full h-64"></canvas>
+                    <canvas baseChart
+                        [data]="membershipPieData"
+                        [options]="pieChartOptions"
+                        [type]="'doughnut'"
+                        [legend]="true"
+                        [plugins]="chartPlugins"
+                        class="w-full h-64">
+                    </canvas>
                 </div>
             </div>
         </ng-container>

@@ -9,6 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { RegistrarPagoDialogComponent } from './registrar-pago-dialog.component';
+import { ErrorDialogComponent } from './error-dialog.component';
 
 @Component({
   selector: 'app-nuevo-cliente-dialog',
@@ -18,7 +19,8 @@ import { RegistrarPagoDialogComponent } from './registrar-pago-dialog.component'
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    MatSelectModule
+    MatSelectModule,
+    ErrorDialogComponent
   ],
   templateUrl: './nuevo-cliente-dialog.component.html'
 })
@@ -38,7 +40,9 @@ export class NuevoClienteDialogComponent {
 
   async saveClient() {
     if (!this.client.name || !this.client.lastName || !this.client.dni || !this.client.phone) {
-      alert('Por favor complete todos los campos obligatorios.');
+      this.dialog.open(ErrorDialogComponent, {
+        data: { message: 'Por favor complete todos los campos obligatorios.' }
+      });
       return;
     }
 
@@ -51,7 +55,9 @@ export class NuevoClienteDialogComponent {
     pagoDialog.afterClosed().subscribe(async (pagoResult: any) => {
       if (!pagoResult) return; // Cancelado
       if (!pagoResult.pagoRealizado) {
-        alert('No se registró el cliente porque no pagó la inscripción.');
+        this.dialog.open(ErrorDialogComponent, {
+          data: { message: 'No se registró el cliente porque no pagó la inscripción.' }
+        });
         return;
       }
 
@@ -66,7 +72,9 @@ export class NuevoClienteDialogComponent {
       ]).select();
 
       if (clienteError || !clienteData || !clienteData[0]) {
-        alert('Error al registrar el cliente: ' + (clienteError?.message || 'Error desconocido'));
+        this.dialog.open(ErrorDialogComponent, {
+          data: { message: 'Error al registrar el cliente: ' + (clienteError?.message || 'Error desconocido') }
+        });
         return;
       }
 
@@ -91,7 +99,9 @@ export class NuevoClienteDialogComponent {
         }
       ]);
       if (pagoError) {
-        alert('Cliente registrado, pero error al registrar el pago: ' + pagoError.message);
+        this.dialog.open(ErrorDialogComponent, {
+          data: { message: 'Cliente registrado, pero error al registrar el pago: ' + pagoError.message }
+        });
         this.dialogRef.close(this.client);
         return;
       }

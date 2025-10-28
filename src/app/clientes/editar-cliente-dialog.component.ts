@@ -1,4 +1,6 @@
 import { Component, Inject } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import { ErrorDialogComponent } from './error-dialog.component';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -7,7 +9,7 @@ import { MatButtonModule } from '@angular/material/button';
 @Component({
   selector: 'app-editar-cliente-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatButtonModule],
+  imports: [CommonModule, FormsModule, MatButtonModule, ErrorDialogComponent],
   template: `
   <div class="p-6 w-full max-w-md mx-auto">
     <h2 class="text-xl font-bold mb-4">Editar Cliente</h2>
@@ -41,7 +43,8 @@ export class EditarClienteDialogComponent {
 
   constructor(
     public dialogRef: MatDialogRef<EditarClienteDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any
+    @Inject(MAT_DIALOG_DATA) public data: any,
+    private dialog: MatDialog
   ) {
     // Copia para edición
     this.cliente = { ...data };
@@ -49,7 +52,9 @@ export class EditarClienteDialogComponent {
 
   guardar() {
     if (!this.cliente.nombres || !this.cliente.apellidos || !this.cliente.dni || !this.cliente.telefono) {
-      alert('Complete todos los campos.');
+      this.dialog.open(ErrorDialogComponent, {
+        data: { message: 'Complete todos los campos.' }
+      });
       return;
     }
     this.dialogRef.close(this.cliente);

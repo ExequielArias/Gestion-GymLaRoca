@@ -5,6 +5,7 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { NuevoClienteDialogComponent } from './nuevo-cliente-dialog.component';
+import { ErrorDialogComponent } from './error-dialog.component';
 import { RegistrarPagoDialogComponent } from './registrar-pago-dialog.component';
 import { EditarClienteDialogComponent } from './editar-cliente-dialog.component';
 import { VerRutinaDialogComponent } from './ver-rutina-dialog.component';
@@ -12,7 +13,7 @@ import { VerRutinaDialogComponent } from './ver-rutina-dialog.component';
 @Component({
   selector: 'app-clientes',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, MatDialogModule, RegistrarPagoDialogComponent, EditarClienteDialogComponent, VerRutinaDialogComponent],
+  imports: [CommonModule, RouterModule, FormsModule, MatDialogModule, RegistrarPagoDialogComponent, EditarClienteDialogComponent, VerRutinaDialogComponent, ErrorDialogComponent],
   templateUrl: './clientes.component.html',
   styleUrl: './clientes.component.css'
 })
@@ -30,7 +31,9 @@ export class ClientesComponent implements OnInit {
   async loadClients() {
     const { data, error } = await supabase.from('clientes').select('*');
     if (error) {
-      alert('Error al cargar clientes: ' + error.message);
+      this.dialog.open(ErrorDialogComponent, {
+        data: { message: 'Error al cargar clientes: ' + error.message }
+      });
       this.clients = [];
       this.filteredClients = [];
       return;
@@ -74,7 +77,9 @@ export class ClientesComponent implements OnInit {
     // Obtener datos completos del cliente
     const { data, error } = await supabase.from('clientes').select('*').eq('id', client.id).single();
     if (error || !data) {
-      alert('No se pudo cargar el cliente para editar.');
+      this.dialog.open(ErrorDialogComponent, {
+        data: { message: 'No se pudo cargar el cliente para editar.' }
+      });
       return;
     }
     const dialogRef = this.dialog.open(EditarClienteDialogComponent, {
@@ -91,7 +96,9 @@ export class ClientesComponent implements OnInit {
           telefono: result.telefono
         }).eq('id', client.id);
         if (updateError) {
-          alert('Error al actualizar cliente: ' + updateError.message);
+          this.dialog.open(ErrorDialogComponent, {
+            data: { message: 'Error al actualizar cliente: ' + updateError.message }
+          });
         } else {
           this.loadClients();
         }
@@ -119,7 +126,9 @@ export class ClientesComponent implements OnInit {
     if (!confirm(`¿Seguro que deseas eliminar a ${client.name}? Esta acción no se puede deshacer.`)) return;
     const { error } = await supabase.from('clientes').delete().eq('id', client.id);
     if (error) {
-      alert('Error al eliminar cliente: ' + error.message);
+      this.dialog.open(ErrorDialogComponent, {
+        data: { message: 'Error al eliminar cliente: ' + error.message }
+      });
       return;
     }
     this.loadClients();
