@@ -2,8 +2,9 @@
     <div class="container mx-auto px-6 py-8">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Verificación de Acceso -->
-            <div class="lg:col-span-2">
-                <div class="bg-gray-900 rounded-lg shadow-sm p-6 mb-6 border border-gray-800">
+            <div class="lg:col-span-2 h-full">
+                <div
+                    class="bg-gray-900 rounded-lg shadow-sm p-6 mb-6 border border-gray-800 h-full min-h-full flex flex-col">
                     <h2 class="text-lg font-semibold text-white mb-2 flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20"
                             fill="currentColor">
@@ -12,6 +13,7 @@
                         </svg>
                         Verificación de Acceso
                     </h2>
+
                     <p class="text-sm text-gray-400 mb-4">Ingresa el DNI del cliente</p>
 
                     <div class="flex flex-col sm:flex-row gap-3">
@@ -38,102 +40,65 @@
                             Limpiar Búsqueda
                         </button>
                     </div>
-                </div>
 
-                <!-- Result Card -->
-                <div *ngIf="result && result.client"
-                    [class]="result.status === 'permitido' ? 'border-green-600 bg-gray-900' : 'border-red-700 bg-gray-900'"
-                    class="rounded-lg border-2 p-6 mb-6 transition-all duration-300">
-                    <div class="flex flex-col items-center text-center">
-                        <div class="w-16 h-16 rounded-full flex items-center justify-center mb-4"
-                            [class]="result.status === 'permitido' ? 'bg-green-900 text-green-400 border border-green-600' : 'bg-red-900 text-red-400 border border-red-700'">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M5 13l4 4L19 7" />
-                            </svg>
-                        </div>
+                    <!-- RESULTADO DE VERIFICACIÓN (ahora bien ubicado aquí) -->
+                    <div *ngIf="result && result.client"
+                        class="mt-6 rounded-lg border-2 p-6 transition-all duration-300"
+                        [class]="result.status === 'permitido' ? 'border-green-600 bg-gray-900' : 'border-red-700 bg-gray-900'">
+                        <div class="flex flex-col items-center text-center">
+                            <div class="w-16 h-16 rounded-full flex items-center justify-center mb-4 border"
+                                [class]="result.status === 'permitido' ? 'bg-green-900 text-green-400 border-green-600' : 'bg-red-900 text-red-400 border-red-700'">
+                                <svg *ngIf="result.status === 'permitido'" xmlns="http://www.w3.org/2000/svg"
+                                    class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 13l4 4L19 7" />
+                                </svg>
+                                <svg *ngIf="result.status !== 'permitido'" xmlns="http://www.w3.org/2000/svg"
+                                    class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </div>
 
-                        <h3 class="text-xl font-bold mb-2"
-                            [class]="result.status === 'permitido' ? 'text-green-400' : 'text-red-400'">
-                            {{ result.status === 'permitido' ? 'ACCESO PERMITIDO' : 'ACCESO DENEGADO' }}
-                        </h3>
+                            <h3 class="text-xl font-bold mb-2"
+                                [class]="result.status === 'permitido' ? 'text-green-400' : 'text-red-400'">
+                                {{ result.status === 'permitido' ? 'ACCESO PERMITIDO' : 'ACCESO DENEGADO' }}
+                            </h3>
 
-                        <div class="mt-4 w-full max-w-md bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-700">
-                            <div class="flex items-start">
-                                <div
-                                    class="w-12 h-12 bg-gray-900 rounded-full flex items-center justify-center mr-4 border border-gray-700">
-                                    <span class="text-gray-400 font-semibold">{{ result.client.charAt(0) }}</span>
-                                </div>
-                                <div class="flex-grow">
-                                    <h4 class="font-semibold text-white">{{ result.client }}</h4>
-                                    <div class="text-sm text-gray-400 mt-1">
-                                        <p>DNI: {{ result.dni }}</p>
-                                        <p>Membresía: {{ result.membership }}</p>
-                                        <p>Vencimiento: {{ result.expirationDate }}</p>
+                            <div
+                                class="mt-4 w-full max-w-md bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-700">
+                                <div class="flex items-start">
+                                    <div
+                                        class="w-12 h-12 bg-gray-900 rounded-full flex items-center justify-center mr-4 border border-gray-700">
+                                        <span class="text-gray-400 font-semibold">{{ result.client.charAt(0) }}</span>
                                     </div>
-                                    <div class="mt-1">
-                                        <span
-                                            class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
-                                            [class]="result.status === 'permitido' ? 'bg-green-900 text-green-400 border border-green-600' : 'bg-red-900 text-red-400 border border-red-700'">
-                                            {{ result.status === 'permitido' ? 'Activo' : 'Vencido' }}
-                                        </span>
+                                    <div class="flex-grow">
+                                        <h4 class="font-semibold text-white">{{ result.client }}</h4>
+                                        <div class="text-sm text-gray-400 mt-1">
+                                            <p>DNI: {{ result.dni }}</p>
+                                            <p>Membresía: {{ result.membership }}</p>
+                                            <p>Vencimiento: {{ result.expirationDate }}</p>
+                                        </div>
+                                        <div class="mt-1">
+                                            <span
+                                                class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border"
+                                                [class]="result.status === 'permitido' ? 'bg-green-900 text-green-400 border-green-600' : 'bg-red-900 text-red-400 border-red-700'">
+                                                {{ result.status === 'permitido' ? 'Activo' : 'Vencido' }}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <!-- Registro Completo de Asistencias -->
-                <div class="bg-gray-900 rounded-lg shadow-sm p-6 border border-gray-800">
-                    <h2 class="text-lg font-semibold text-white mb-4 flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20"
-                            fill="currentColor">
-                            <path fill-rule="evenodd"
-                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.414-1.414L11 9.586V6z"
-                                clip-rule="evenodd" />
-                        </svg>
-                        Registro Completo de Asistencias
-                    </h2>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm">
-                            <thead class="text-left text-gray-400 uppercase tracking-wider">
-                                <tr class="border-b border-gray-700">
-                                    <th class="py-3">Fecha</th>
-                                    <th class="py-3">Hora</th>
-                                    <th class="py-3">Cliente</th>
-                                    <th class="py-3">DNI</th>
-                                    <th class="py-3">Estado</th>
-                                    <th class="py-3">Observaciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr *ngFor="let record of attendanceRecords"
-                                    class="border-b border-gray-800 last:border-b-0">
-                                    <td class="py-3 text-gray-300">{{ record.date }}</td>
-                                    <td class="py-3 text-gray-300">{{ record.time }}</td>
-                                    <td class="py-3 text-white">{{ record.client }}</td>
-                                    <td class="py-3 text-gray-300">{{ record.dni }}</td>
-                                    <td class="py-3">
-                                        <span
-                                            class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
-                                            [class]="record.status === 'Permitido' ? 'bg-green-900 text-green-400 border border-green-600' : 'bg-red-900 text-red-400 border border-red-700'">
-                                            {{ record.status }}
-                                        </span>
-                                    </td>
-                                    <td class="py-3 text-gray-400">{{ record.notes || '-' }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    <!-- FIN RESULTADO -->
                 </div>
             </div>
 
-            <!-- Sidebar: Estadísticas y Historial -->
-            <div class="space-y-6">
-                <!-- Estadísticas de Hoy -->
-                <div class="bg-gray-900 rounded-lg shadow-sm p-6 border border-gray-800">
+            <!-- Sidebar: Estadísticas de Hoy -->
+            <div class="space-y-6 lg:col-span-1 h-full">
+                <div
+                    class="bg-gray-900 rounded-lg shadow-sm p-6 border border-gray-800 h-full min-h-full flex flex-col">
                     <h3 class="text-lg font-semibold text-white mb-4 flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20"
                             fill="currentColor">
@@ -188,6 +153,75 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Registro Completo de Asistencias -->
+        <div class="bg-gray-900 rounded-lg shadow-sm p-6 border border-gray-800 mt-4">
+            <h2 class="text-lg font-semibold text-white mb-4 flex items-center">
+                Registro Completo de Asistencias
+            </h2>
+
+            <div class="overflow-hidden rounded-md border border-gray-800">
+                <!-- Encabezado -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left table-fixed box-border">
+                        <colgroup>
+                            <col style="width:15%" />
+                            <col style="width:12%" />
+                            <col style="width:30%" />
+                            <col style="width:12%" />
+                            <col style="width:13%" />
+                            <col style="width:18%" />
+                        </colgroup>
+                        <thead class="uppercase tracking-wider bg-gray-800 text-gray-300">
+                            <tr>
+                                <th class="py-3 px-3">FECHA</th>
+                                <th class="py-3 px-3">HORA</th>
+                                <th class="py-3 px-3">CLIENTE</th>
+                                <th class="py-3 px-3">DNI</th>
+                                <th class="py-3 px-3">ESTADO</th>
+                                <th class="py-3 px-3">OBSERVACIONES</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+
+                <!-- Cuerpo con virtual scroll -->
+                <cdk-virtual-scroll-viewport itemSize="48" class="block overflow-y-auto"
+                    style="height:480px; width:100%; scrollbar-color: #6b7280 transparent; scrollbar-width: thin; scrollbar-gutter: stable;">
+                    <table class="w-full text-sm text-left table-fixed box-border">
+                        <colgroup>
+                            <col style="width:15%" />
+                            <col style="width:12%" />
+                            <col style="width:30%" />
+                            <col style="width:12%" />
+                            <col style="width:13%" />
+                            <col style="width:18%" />
+                        </colgroup>
+
+                        <tbody>
+                            <tr *cdkVirtualFor="let record of attendanceRecords"
+                                class="border-b border-gray-800 last:border-b-0 hover:bg-gray-800/40 transition-colors">
+                                <td class="py-3 px-3 text-gray-300 truncate">{{ record.date }}</td>
+                                <td class="py-3 px-3 text-gray-300 truncate">{{ record.time }}</td>
+                                <td class="py-3 px-3 text-white truncate">{{ record.client }}</td>
+                                <td class="py-3 px-3 text-gray-300 truncate">{{ record.dni }}</td>
+                                <td class="py-3 px-3">
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
+                                        [class]="
+                      record.status === 'Permitido'
+                        ? 'bg-green-900 text-green-400 border border-green-600'
+                        : 'bg-red-900 text-red-400 border border-red-700'
+                    ">
+                                        {{ record.status }}
+                                    </span>
+                                </td>
+                                <td class="py-3 px-3 text-gray-400 truncate">{{ record.notes || '-' }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </cdk-virtual-scroll-viewport>
             </div>
         </div>
     </div>
