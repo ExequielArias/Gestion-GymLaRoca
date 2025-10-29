@@ -1,5 +1,6 @@
 
 import { Component } from '@angular/core';
+import { ScrollingModule } from '@angular/cdk/scrolling';
 import { ErrorDialogComponent } from '../clientes/error-dialog.component';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
@@ -10,7 +11,7 @@ import { supabase } from '../supabase.client';
 @Component({
   selector: 'app-asistencias',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, MatDialogModule, ErrorDialogComponent],
+  imports: [CommonModule, RouterModule, FormsModule, MatDialogModule, ErrorDialogComponent, ScrollingModule],
   templateUrl: './asistencias.component.html',
   styleUrls: ['./asistencias.component.css']
 })
@@ -37,8 +38,7 @@ export class AsistenciasComponent {
     const { data, error } = await supabase
       .from('asistencias')
       .select('hora, cliente_nombre, cliente_dni, estado, observaciones, fecha')
-      .order('fecha', { ascending: false })
-      .order('hora', { ascending: false });
+      .order('id', { ascending: false });
     if (!error && data) {
       this.attendanceRecords = data.map((r: any) => ({
         time: r.hora,
@@ -96,7 +96,6 @@ export class AsistenciasComponent {
   async verifyAccess() {
     if (!this.searchTerm) return;
 
-
     // Buscar cliente solo por DNI
     const { data: clientList, error: clientError } = await supabase
       .from('clientes')
@@ -104,77 +103,74 @@ export class AsistenciasComponent {
       .eq('dni', this.searchTerm);
     const client = Array.isArray(clientList) && clientList.length > 0 ? clientList[0] : null;
 
+    let resultObj: any = null;
+    let registrar = false;
+    let registrarEstado = 'Denegado';
+    let registrarObs = '';
     if (clientError || !client) {
-      this.result = {
+      resultObj = {
         client: 'No encontrado',
         dni: this.searchTerm,
         membership: '-',
         expirationDate: '-',
         status: 'denegado'
       };
-      try {
-        await this.registerAttendance(null, 'Denegado', 'Cliente no encontrado');
-      } catch (e: any) {
-        this.dialog.open(ErrorDialogComponent, {
-          data: { message: 'Error registrando asistencia: ' + (typeof e === 'object' && e && 'message' in e ? (e as any).message : e) }
+      registrar = true;
+      registrarObs = 'Cliente no encontrado';
+    } else {
+      // Buscar pagos válidos (no vencidos)
+      const { data: pagos, error: pagosError } = await supabase
+        .from('pagos')
+        .select('*')
+        .eq('cliente_id', client.id)
+        .order('fecha_vencimiento', { ascending: false });
+
+      let membership = '-';
+      let expirationDate = '-';
+      let isActive = false;
+      if (!pagosError && pagos && pagos.length > 0) {
+        // Buscar el pago con fecha de vencimiento igual o posterior a hoy
+        const hoy = new Date();
+        hoy.setHours(0, 0, 0, 0);
+        const pagoValido = pagos.find((p: any) => {
+          if (!p.fecha_vencimiento) return false;
+          const vencimiento = new Date(p.fecha_vencimiento);
+          vencimiento.setHours(0, 0, 0, 0);
+          return vencimiento >= hoy;
         });
+        if (pagoValido) {
+          membership = pagoValido.tipo_membresia || '-';
+          expirationDate = pagoValido.fecha_vencimiento ? new Date(pagoValido.fecha_vencimiento).toLocaleDateString() : '-';
+          isActive = true;
+        } else {
+          const ultimoPago = pagos[0];
+          membership = ultimoPago.tipo_membresia || '-';
+          expirationDate = ultimoPago.fecha_vencimiento ? new Date(ultimoPago.fecha_vencimiento).toLocaleDateString() : '-';
+          isActive = false;
+        }
       }
-      try {
-        await this.loadTodayAttendance();
-      } catch (e: any) {
-        this.dialog.open(ErrorDialogComponent, {
-          data: { message: 'Error cargando asistencias: ' + (typeof e === 'object' && e && 'message' in e ? (e as any).message : e) }
-        });
-      }
-      return;
+      resultObj = {
+        client: `${client.nombres} ${client.apellidos}`.trim(),
+        dni: client.dni,
+        membership,
+        expirationDate,
+        status: isActive ? 'permitido' : 'denegado'
+      };
+      registrar = true;
+      registrarEstado = isActive ? 'Permitido' : 'Denegado';
+      registrarObs = isActive ? '' : 'Membresía vencida';
     }
 
+    // Mostrar solo el resultado en el recuadro, no en la tabla
+    this.result = resultObj;
 
-    // Buscar pagos válidos (no vencidos)
-    const { data: pagos, error: pagosError } = await supabase
-      .from('pagos')
-      .select('*')
-      .eq('cliente_id', client.id)
-      .order('fecha_vencimiento', { ascending: false });
-
-    let membership = '-';
-    let expirationDate = '-';
-    let isActive = false;
-    if (!pagosError && pagos && pagos.length > 0) {
-      // Buscar el pago con fecha de vencimiento igual o posterior a hoy (usando Date para evitar problemas de zona horaria y formato)
-      const hoy = new Date();
-      hoy.setHours(0, 0, 0, 0); // Ignorar hora
-      const pagoValido = pagos.find((p: any) => {
-        if (!p.fecha_vencimiento) return false;
-        const vencimiento = new Date(p.fecha_vencimiento);
-        vencimiento.setHours(0, 0, 0, 0);
-        return vencimiento >= hoy;
-      });
-      if (pagoValido) {
-        membership = pagoValido.tipo_membresia || '-';
-        expirationDate = pagoValido.fecha_vencimiento ? new Date(pagoValido.fecha_vencimiento).toLocaleDateString() : '-';
-        isActive = true;
-      } else {
-        // Si no hay pagos válidos, mostrar el último pago para info
-        const ultimoPago = pagos[0];
-        membership = ultimoPago.tipo_membresia || '-';
-        expirationDate = ultimoPago.fecha_vencimiento ? new Date(ultimoPago.fecha_vencimiento).toLocaleDateString() : '-';
-        isActive = false;
-      }
+    // Registrar asistencia solo si corresponde
+    if (registrar) {
+      await this.registerAttendance(client, registrarEstado, registrarObs);
+      await new Promise(res => setTimeout(res, 200));
+      await this.loadTodayAttendance();
+      await this.loadAllAttendance();
     }
-
-    this.result = {
-      client: `${client.nombres} ${client.apellidos}`.trim(),
-      dni: client.dni,
-      membership,
-      expirationDate,
-      status: isActive ? 'permitido' : 'denegado'
-    };
-
-  await this.registerAttendance(client, isActive ? 'Permitido' : 'Denegado', isActive ? '' : 'Membresía vencida');
-  // Forzar recarga inmediata de estadísticas e historial
-  await this.loadTodayAttendance();
-  await this.loadAllAttendance();
   }
 
   async registerAttendance(client: any, estado: string, observaciones: string) {

@@ -1,0 +1,14 @@
+/* Scrollbar para virtual scroll: fondo transparente y color acorde */
+.cdk-virtual-scroll-viewport {
+	scrollbar-width: thin;
+	scrollbar-color: #6b7280 transparent;
+}
+
+.cdk-virtual-scroll-viewport::-webkit-scrollbar {
+	width: 8px;
+	background: transparent;
+}
+.cdk-virtual-scroll-viewport::-webkit-scrollbar-thumb {
+	background: #6b7280;
+	border-radius: 4px;
+}
