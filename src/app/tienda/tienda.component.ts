@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ErrorDialogComponent } from '../clientes/error-dialog.component';
+import { ConfirmDialogComponent } from '../shared/confirm-dialog.component';
+import { SuccessDialogComponent } from '../clientes/success-dialog.component';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -19,7 +21,7 @@ interface Product {
 @Component({
     selector: 'app-tienda',
     standalone: true,
-    imports: [CommonModule, RouterModule, FormsModule],
+    imports: [CommonModule, RouterModule, FormsModule, ErrorDialogComponent],
     templateUrl: './tienda.component.html'
 })
 export class TiendaComponent {
@@ -143,9 +145,68 @@ export class TiendaComponent {
     processSale() {
         if (this.cart.length === 0) return;
 
-        this.dialog.open(ErrorDialogComponent, {
-            data: { message: `Venta procesada por $${this.getTotal().toLocaleString('es-AR')} con método de pago: ${this.selectedPaymentMethod}` }
-        });
+        // Proceso dependiendo del método de pago
+        if (this.selectedPaymentMethod === 'efectivo') {
+            this.handleImmediatePayment();
+            return;
+        }
+
+        if (this.selectedPaymentMethod === 'transferencia') {
+            // Abrir diálogo de espera/confirmación; el dueño verificará y confirmará
+            const ref = this.dialog.open(ConfirmDialogComponent, {
+                data: {
+                    title: 'Transferencia bancaria',
+                    message: 'Esperando acreditación de la transferencia. Cuando el pago sea confirmado por el dueño, presione "Pago acreditado". Si desea cancelar, presione "Cancelar".',
+                    confirmLabel: 'Pago acreditado',
+                    cancelLabel: 'Cancelar'
+                }
+            });
+
+            ref.afterClosed().subscribe(async (confirmed: boolean) => {
+                if (confirmed) {
+                    await this.handleImmediatePayment();
+                } else {
+                    this.dialog.open(ErrorDialogComponent, { data: { message: 'La compra fue cancelada.' } });
+                }
+            });
+            return;
+        }
+    }
+
+    private async handleImmediatePayment() {
+        // Verificar stock en el cliente antes de intentar procesar
+        for (const item of this.cart) {
+            const product = this.products.find(p => p.id === item.id);
+            if (!product) {
+                this.dialog.open(ErrorDialogComponent, { data: { message: `Producto con id ${item.id} no encontrado.` } });
+                return;
+            }
+            if (item.quantity > product.stock) {
+                this.dialog.open(ErrorDialogComponent, { data: { message: `Stock insuficiente para ${product.name}. Stock actual: ${product.stock}` } });
+                return;
+            }
+        }
+
+        // Preparar payload para el servicio
+        const payload = this.cart.map(i => ({ id: i.id, quantity: i.quantity }));
+
+        const result = await this.tiendaService.applySale(payload);
+        if (!result || !result.success) {
+            console.error('Error aplicando la venta:', result);
+            this.dialog.open(ErrorDialogComponent, { data: { message: 'Ocurrió un error al procesar la venta. Revisar consola para detalles.' } });
+            return;
+        }
+
+        // Actualizar stock en frontend
+        for (const item of this.cart) {
+            const prod = this.products.find(p => p.id === item.id);
+            if (prod) {
+                prod.stock = Math.max(0, prod.stock - item.quantity);
+            }
+        }
+        this.filterProducts();
+
+    this.dialog.open(SuccessDialogComponent, { data: { message: `Venta procesada por $${this.getTotal().toLocaleString('es-AR')} con método de pago: ${this.selectedPaymentMethod}` } });
         this.cart = [];
         this.showCart = false;
     }

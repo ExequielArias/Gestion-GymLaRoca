@@ -107,4 +107,45 @@ export class TiendaService {
         return mapped;
     }
 
+    /**
+     * Aplica la venta: decrementa el stock en la tabla Productos según el carrito.
+     * Retorna { success: true } o { success: false, error }
+     */
+    async applySale(cart: Array<{ id: number; quantity: number }>) {
+        // Realizar updates por producto
+        const results: Array<{ id: number; error?: any }> = [];
+
+        for (const item of cart) {
+            try {
+                // Obtener la fila actual (opcional, para garantizar base)
+                const { data: currentRows, error: readErr } = await supabase.from('Productos').select('Cantidad').eq('id', item.id).limit(1).single();
+                if (readErr) {
+                    results.push({ id: item.id, error: readErr });
+                    continue;
+                }
+                const current = (currentRows && (currentRows as any).Cantidad) ?? null;
+                if (current === null) {
+                    results.push({ id: item.id, error: 'Producto no encontrado' });
+                    continue;
+                }
+                const newStock = Math.max(0, Number(current) - Number(item.quantity));
+
+                const { error: updateErr } = await supabase.from('Productos').update({ Cantidad: newStock }).eq('id', item.id);
+                if (updateErr) {
+                    results.push({ id: item.id, error: updateErr });
+                } else {
+                    results.push({ id: item.id });
+                }
+            } catch (e) {
+                results.push({ id: item.id, error: e });
+            }
+        }
+
+        const failed = results.filter(r => r.error);
+        if (failed.length > 0) {
+            return { success: false, details: failed };
+        }
+        return { success: true };
+    }
+
 }
