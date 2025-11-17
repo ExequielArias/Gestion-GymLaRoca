@@ -21,6 +21,7 @@ export class DashboardComponent implements OnInit {
     totalClientesNuevos = 0;
     totalAsistenciasHoy = 0;
     totalTiposMembresia = 0;
+    // (ventas removed from UI) no más propiedades de ventas aquí
 
     // Chart.js ChartData para ng2-charts
     activeClientsChartData: ChartData<'line'> = {
@@ -47,6 +48,7 @@ export class DashboardComponent implements OnInit {
             { data: [], backgroundColor: ['#ef4444', '#22c55e', '#3b82f6', '#a855f7', '#f59e0b'] }
         ]
     };
+    // (removed sales chart data)
 
     // Opciones minimalistas y plugins
     lineChartOptions: ChartOptions<'line'> = {
@@ -90,7 +92,8 @@ export class DashboardComponent implements OnInit {
                         return Number.isInteger(value) ? value : '';
                     }
                 },
-                grid: { color: '#222' }
+                grid: { color: '#222' },
+                min: 0
             }
         }
     };
@@ -127,7 +130,8 @@ export class DashboardComponent implements OnInit {
                         return Number.isInteger(value) ? value : '';
                     }
                 },
-                grid: { color: '#222' }
+                grid: { color: '#222' },
+                min: 0
             }
         }
     };
@@ -149,6 +153,7 @@ export class DashboardComponent implements OnInit {
                 await this.loadCharts();
             }
         });
+
     }
 
     async loadCharts() {
@@ -164,6 +169,8 @@ export class DashboardComponent implements OnInit {
             this.isLoading = false;
         }
     }
+
+    // (sales code removed)
 
     // 📈 CLIENTES ACTIVOS POR MES
     async renderActiveClientsChart() {
@@ -197,7 +204,7 @@ export class DashboardComponent implements OnInit {
         this.totalClientesActivos = dataArr[dataArr.length - 1];
 
         this.activeClientsChartData.labels = labels;
-        this.activeClientsChartData.datasets[0].data = dataArr;
+        this.activeClientsChartData.datasets[0].data = this.clampArrayNonNegative(dataArr);
     }
 
     // 🧍‍♂️ CLIENTES NUEVOS POR MES
@@ -237,7 +244,7 @@ export class DashboardComponent implements OnInit {
         this.totalClientesNuevos = dataArr[dataArr.length - 1];
 
         this.newClientsChartData.labels = labels;
-        this.newClientsChartData.datasets[0].data = dataArr;
+        this.newClientsChartData.datasets[0].data = this.clampArrayNonNegative(dataArr);
     }
 
     // 🕒 ASISTENCIAS (ÚLTIMOS 15 DÍAS)
@@ -273,7 +280,7 @@ export class DashboardComponent implements OnInit {
         this.totalAsistenciasHoy = dataArr[dataArr.length - 1];
 
     this.attendanceChartData.labels = labels;
-    this.attendanceChartData.datasets[0].data = dataArr;
+    this.attendanceChartData.datasets[0].data = this.clampArrayNonNegative(dataArr);
     }
 
     // 🍩 DISTRIBUCIÓN DE MEMBRESÍAS
@@ -292,7 +299,15 @@ export class DashboardComponent implements OnInit {
         this.totalTiposMembresia = labels.length;
 
     this.membershipPieData.labels = labels;
-    this.membershipPieData.datasets[0].data = dataArr;
+    this.membershipPieData.datasets[0].data = this.clampArrayNonNegative(dataArr as number[]);
+    }
+
+    // Helper: ensure no negative numbers in arrays
+    private clampArrayNonNegative(arr: number[]): number[] {
+        return arr.map(v => {
+            const n = Number(v) || 0;
+            return n < 0 ? 0 : n;
+        });
     }
 
     // 🎨 Opciones globales de diseño para mantener coherencia

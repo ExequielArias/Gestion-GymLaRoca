@@ -7,6 +7,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { TiendaService } from './tienda.service';
+import { supabase } from '../supabase.client';
 
 interface Product {
     id: number;
@@ -21,7 +22,7 @@ interface Product {
 @Component({
     selector: 'app-tienda',
     standalone: true,
-    imports: [CommonModule, RouterModule, FormsModule, ErrorDialogComponent],
+    imports: [CommonModule, RouterModule, FormsModule],
     templateUrl: './tienda.component.html'
 })
 export class TiendaComponent {
@@ -206,7 +207,62 @@ export class TiendaComponent {
         }
         this.filterProducts();
 
-    this.dialog.open(SuccessDialogComponent, { data: { message: `Venta procesada por $${this.getTotal().toLocaleString('es-AR')} con método de pago: ${this.selectedPaymentMethod}` } });
+        // Registrar la venta en la tabla 'pagos' para que el dashboard la lea
+        try {
+            const totalAmount = this.getTotal();
+            const fechaPago = new Date().toISOString();
+
+            // Intentar insertar ventas por ítem en la tabla 'ventas' (si existe)
+            const ventaRows = this.cart.map(item => ({
+                fecha: fechaPago,
+                producto_id: item.id,
+                cantidad: item.quantity,
+                precio_unitario: item.price,
+                total: Number(item.price) * Number(item.quantity)
+            }));
+
+            try {
+                const { error: ventasErr } = await supabase.from('ventas').insert(ventaRows);
+                if (ventasErr) {
+                    // Si falla, intentar insertar en 'pagos_items' (si existe) o volver al fallback a 'pagos'
+                    console.warn('No se pudo insertar en tabla ventas, error:', ventasErr.message || ventasErr);
+                    // Intentar insertar items en 'pagos_items'
+                    try {
+                        const pagosItems = ventaRows.map(v => ({ fecha_pago: v.fecha, producto_id: v.producto_id, cantidad: v.cantidad, precio_unitario: v.precio_unitario, total: v.total }));
+                        const { error: pagosItemsErr } = await supabase.from('pagos_items').insert(pagosItems);
+                        if (pagosItemsErr) {
+                            console.warn('No se pudo insertar en pagos_items:', pagosItemsErr.message || pagosItemsErr);
+                            // Fallback: insertar un resumen en 'pagos' (como antes)
+                            const { error: pagoError } = await supabase.from('pagos').insert([
+                                { fecha_pago: fechaPago, monto: totalAmount, metodo_pago: this.selectedPaymentMethod }
+                            ]);
+                            if (pagoError) console.error('Error registrando venta en pagos (fallback):', pagoError);
+                        }
+                    } catch (e) {
+                        console.error('Error intentando insertar en pagos_items:', e);
+                    }
+                }
+            } catch (e) {
+                console.warn('Excepción insertando en ventas:', e);
+                // Fallback: insertar un resumen en 'pagos'
+                const { error: pagoError } = await supabase.from('pagos').insert([
+                    { fecha_pago: fechaPago, monto: totalAmount, metodo_pago: this.selectedPaymentMethod }
+                ]);
+                if (pagoError) console.error('Error registrando venta en pagos (fallback):', pagoError);
+            }
+
+            // Notificar a otros componentes (ej. dashboard) que hay nuevos datos
+            try {
+                // Incluir detalle de items para permitir actualización optimista en el cliente
+                window.dispatchEvent(new CustomEvent('data-updated', { detail: { source: 'tienda', monto: totalAmount, items: ventaRows } }));
+            } catch (e) {
+                try { window.dispatchEvent(new Event('data-updated')); } catch (e2) { /* ignore */ }
+            }
+        } catch (e) {
+            console.error('Error al intentar registrar venta en la base de datos:', e);
+        }
+
+        this.dialog.open(SuccessDialogComponent, { data: { message: `Venta procesada por $${this.getTotal().toLocaleString('es-AR')} con método de pago: ${this.selectedPaymentMethod}` } });
         this.cart = [];
         this.showCart = false;
     }
