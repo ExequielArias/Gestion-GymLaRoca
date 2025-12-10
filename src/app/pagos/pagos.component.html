@@ -99,6 +99,7 @@
                         Ver historial de pagos
                     </button>
                 </div>
+
                 <div class="flex justify-between items-start mb-6">
                     <div>
                         <h2 class="text-xl font-semibold text-white">{{ clienteSeleccionado.nombres }} {{
@@ -126,6 +127,22 @@
                         <p class="text-sm text-gray-400">Vencimiento</p>
                         <p class="font-medium text-white">{{ fechaVencimiento }}</p>
                     </div>
+                </div>
+
+                <!-- BOTONES NUEVOS: Pagar / Extender -->
+                <div class="flex gap-4 mb-6">
+                    <!-- BOTÓN PAGAR MEMBRESÍA -->
+                    <button
+                        class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition disabled:opacity-50"
+                        [disabled]="estadoMembresia !== 'Vencido'" (click)="abrirDialogPagar()">
+                        Pagar membresía
+                    </button>
+
+                    <!-- BOTÓN EXTENDER MEMBRESÍA -->
+                    <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                        (click)="abrirDialogExtender()">
+                        Extender membresía
+                    </button>
                 </div>
 
                 <div class="bg-gray-800 p-6 rounded-lg">
@@ -226,6 +243,7 @@
                     </table>
                 </div>
             </div>
+
         </div>
     </div>
 </div>

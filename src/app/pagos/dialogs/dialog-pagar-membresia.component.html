@@ -1,0 +1,47 @@
+<div class="p-5 bg-gray-900 rounded-lg text-gray-200">
+
+    <h2 class="text-xl font-semibold text-white mb-4">Pagar Membresía</h2>
+
+    <div class="mb-4">
+        <label class="text-sm text-gray-300">Monto (ARS)</label>
+        <input type="number" [(ngModel)]="monto"
+            class="w-full px-3 py-2 rounded bg-gray-800 border border-gray-600 text-white" min="0" />
+    </div>
+
+    <div class="mb-4">
+        <label class="text-sm text-gray-300">Método de pago</label>
+        <select [(ngModel)]="metodo" class="w-full px-3 py-2 rounded bg-gray-800 border border-gray-600 text-white">
+            <option value="">-- Seleccionar --</option>
+            <option value="Efectivo">Efectivo</option>
+            <option value="Transferencia">Transferencia</option>
+        </select>
+    </div>
+
+    <!-- VALIDACIÓN TRANSFERENCIA -->
+    <div *ngIf="metodo === 'Transferencia' && !transferOK" class="mt-3 p-4 rounded bg-yellow-900 text-yellow-200">
+        <p>Esperando validación de transferencia...</p>
+
+        <div class="flex gap-3 mt-3">
+            <button class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded"
+                (click)="procesarTransferencia()">
+                Pago procesado
+            </button>
+
+            <button class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded" (click)="onCancel()">
+                Cancelar
+            </button>
+        </div>
+    </div>
+
+    <div class="flex justify-end gap-3 mt-6" *ngIf="metodo !== 'Transferencia' || transferOK">
+        <button class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded" (click)="onCancel()">
+            Cancelar
+        </button>
+
+        <button class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded" [disabled]="!monto || !metodo"
+            (click)="onSave()">
+            Guardar
+        </button>
+    </div>
+
+</div>
