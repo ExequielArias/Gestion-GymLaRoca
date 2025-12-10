@@ -240,3 +240,22 @@ button:hover {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
+
+/* Elimina bordes blancos y sombras del MatDialog */
+.custom-dark-dialog .mat-mdc-dialog-container {
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+/* Contenedor interno del modal */
+.custom-dark-dialog .mdc-dialog__container {
+  background: transparent !important;
+}
+
+/* Fondo interno del panel donde está tu contenido */
+.custom-dark-dialog .mdc-dialog__surface {
+  background-color: transparent !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
