@@ -6,6 +6,7 @@ const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 
 // URL que usaremos como destino del botón de restablecer contraseña en producción
 // Cambia esto por tu dominio de producción (ej. https://misitio.com/reset-password)
-export const RESET_PASSWORD_REDIRECT = 'http://gestiongymlaroca.netlify.app/reset-password';
+// USAR HTTPS si tu hosting soporta HTTPS (Netlify por defecto usa HTTPS)
+export const RESET_PASSWORD_REDIRECT = 'https://gestiongymlaroca.netlify.app/reset-password';
 
 export const supabase = createClient(supabaseUrl, supabaseKey);
