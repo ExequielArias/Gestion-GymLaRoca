@@ -41,7 +41,8 @@ export class AuthService {
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
     if (error) {
-      throw new Error(error.message || 'No se pudo enviar el email de recuperación.');
+      // Añadir contexto útil al error para debug (no incluye tokens)
+      throw new Error((error.message || 'No se pudo enviar el email de recuperación.') + ` (redirect: ${redirectTo})`);
     }
     return true;
   }
