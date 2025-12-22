@@ -26,8 +26,19 @@ export class AuthService {
    * Envía un email de recuperación de contraseña usando Supabase
    */
   async sendPasswordResetEmail(email: string) {
-    // Cambia la URL por la de tu entorno de producción si es necesario
-    const redirectTo = `${window.location.origin}/reset-password`;
+    // Preferir una URL fija de producción si está configurada
+    // Para producción cambia `RESET_PASSWORD_REDIRECT` en `src/app/supabase.client.ts`
+    let redirectTo = `${window.location.origin}/reset-password`;
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { RESET_PASSWORD_REDIRECT } = await import('../supabase.client');
+      if (RESET_PASSWORD_REDIRECT && !RESET_PASSWORD_REDIRECT.includes('localhost')) {
+        redirectTo = RESET_PASSWORD_REDIRECT;
+      }
+    } catch (e) {
+      // ignore
+    }
+
     const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
     if (error) {
       throw new Error(error.message || 'No se pudo enviar el email de recuperación.');
